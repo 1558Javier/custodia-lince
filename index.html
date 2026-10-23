@@ -1095,7 +1095,7 @@
     // =========================================================
     // 0. FUNCIONES SEGURAS DE MEMORIA (EVITAN CONGELAMIENTOS EN WINDOWS / FILE://)
     // =========================================================
-    const URL_NUBE_FIJA_LINCE = "https://script.google.com/macros/s/AKfycby6DxgWEbfD95MwsusQYYGYDVCFYdt-27s8oKPlNC6tFd11pUmV8eV1V6c-DA9NSJCV/exec";
+    const URL_NUBE_FIJA_LINCE = "https://script.google.com/macros/s/AKfycbzOtHTy9o3rmPezz9A9MEARg11LLKpirU-0FK0RbKqTHxcAeX9udxJzF4rTbyfzKMpQ/exec"; localStorage.setItem('urlNubeGoogleDriveLince', "https://script.google.com/macros/s/AKfycbzOtHTy9o3rmPezz9A9MEARg11LLKpirU-0FK0RbKqTHxcAeX9udxJzF4rTbyfzKMpQ/exec");
     let memoriaRespaldoRAM = {};
 
     function leerStorageSeguro(clave, valorPorDefecto) {
@@ -1163,6 +1163,7 @@
             usuarios.unshift({ username: 'ADMIN', clave: '1234', rol: 'ADMIN' });
             guardarStorageSeguro('usuariosLince', JSON.stringify(usuarios));
         }
+        if (!usuarios.some(u => u.username === 'MOLINA')) { usuarios.push({ username: 'MOLINA', clave: '28210208', rol: 'USUARIO' }); guardarStorageSeguro('usuariosLince', JSON.stringify(usuarios)); }
         return usuarios;
     }
 
