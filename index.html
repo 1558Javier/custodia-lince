@@ -2454,5 +2454,69 @@
     }
 </script>
 
+<script id="syncTotalLince">
+let sincronizandoEstadoLince = false;
+async function sincronizarEstadoCompletoConNube(subirLocal = true) {
+    if (sincronizandoEstadoLince) return;
+    sincronizandoEstadoLince = true;
+    try {
+        const u = obtenerUrlActivaNube();
+        let hLocal = [];
+        try { hLocal = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || []; } catch(e) { hLocal = []; }
+        const nLocal = parseInt(leerStorageSeguro('proximoNumHojaLince', '0'), 10) || 0;
+        if (subirLocal && (hLocal.length > 0 || nLocal > 0)) {
+            await fetch(u, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ accion: 'sincronizarEstado', proximoNumHoja: nLocal, historial: hLocal })
+            });
+        }
+        const sep = u.includes('?') ? '&' : '?';
+        const r = await fetch(u + sep + 'accion=obtenerEstado&t=' + Date.now(), { method: 'GET', redirect: 'follow' });
+        if (r.ok) {
+            const d = await r.json();
+            if (d && Array.isArray(d.historial)) {
+                const elim = Array.isArray(d.idsEliminados) ? d.idsEliminados.map(String) : [];
+                const mapa = new Map();
+                d.historial.forEach(x => { if (x && x.id && !elim.includes(String(x.id))) mapa.set(String(x.id), x); });
+                hLocal.forEach(x => { if (x && x.id && !mapa.has(String(x.id)) && !elim.includes(String(x.id))) mapa.set(String(x.id), x); });
+                const unido = Array.from(mapa.values()).sort((a, b) => (b.id || 0) - (a.id || 0));
+                guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(unido));
+                let maxH = 0;
+                unido.forEach(x => { const n = parseInt(x.numHoja, 10); if (!isNaN(n) && (n + 1) > maxH) maxH = n + 1; });
+                const nNube = parseInt(d.proximoNumHoja, 10) || 0;
+                const finalNum = d.forzarCero ? 0 : Math.max(nLocal, nNube, maxH);
+                guardarStorageSeguro('proximoNumHojaLince', String(finalNum));
+                guardarStorageSeguro('contadorResetA0_v1', 'true');
+                actualizarInputNumeroHoja();
+                mostrarHistorial();
+            }
+        }
+    } catch (e) {} finally { sincronizandoEstadoLince = false; }
+}
+const _origIniciarSesion = iniciarSesion;
+iniciarSesion = async function() { await _origIniciarSesion(); await sincronizarEstadoCompletoConNube(true); };
+const _origAbrirHistorial = abrirModalHistorial;
+abrirModalHistorial = async function() { _origAbrirHistorial(); await sincronizarEstadoCompletoConNube(true); };
+const _origGuardarHoja = guardarHojaDeRuta;
+guardarHojaDeRuta = async function() { await sincronizarEstadoCompletoConNube(false); await _origGuardarHoja(); await sincronizarEstadoCompletoConNube(true); };
+eliminarHojaGuardada = async function(id) {
+    if (!confirm('¿ELIMINAR ESTA HOJA DE RUTA DEL HISTORIAL?')) return;
+    let h = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]'));
+    h = h.filter(x => String(x.id) !== String(id));
+    guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(h));
+    mostrarHistorial();
+    try { await fetch(obtenerUrlActivaNube(), { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ accion: 'eliminarHoja', id: id }) }); } catch(e) {}
+};
+reiniciarContadorACero = async function() {
+    if (!confirm('¿QUERÉS VOLVER EL NÚMERO DE HOJA DE RUTA A 00000000 EN TODOS LOS DISPOSITIVOS?')) return;
+    guardarStorageSeguro('proximoNumHojaLince', '0');
+    actualizarInputNumeroHoja();
+    try { await fetch(obtenerUrlActivaNube(), { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ accion: 'reiniciarContador' }) }); } catch(e) {}
+};
+sincronizarEstadoCompletoConNube(true);
+setInterval(() => sincronizarEstadoCompletoConNube(false), 20000);
+</script>
 </body>
 </html>
