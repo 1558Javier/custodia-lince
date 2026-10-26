@@ -80,11 +80,11 @@
         }
 
         /* =========================================================
-           BARRA SUPERIOR DE SESIÓN Y ADMINISTRACIÓN
+           BARRA SUPERIOR DE SESIÓN, ESTADO OFFLINE Y ADMINISTRACIÓN
            ========================================================= */
         .barra-usuario {
             max-width: 900px;
-            margin: 0 auto 12px auto;
+            margin: 0 auto 8px auto;
             background-color: #1e293b;
             color: #ffffff;
             padding: 10px 15px;
@@ -112,14 +112,25 @@
             border-radius: 4px;
             font-size: 11px;
         }
+        .badge-conexion {
+            background-color: #15803d;
+            color: #ffffff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge-conexion.offline {
+            background-color: #d97706;
+        }
         .botones-sesion {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
         .btn-top-3d {
-            padding: 8px 14px;
-            font-size: 12px;
+            padding: 8px 11px;
+            font-size: 11.5px;
             font-weight: bold;
             color: #ffffff;
             border: none;
@@ -144,6 +155,14 @@
             transform: translateY(4px);
             box-shadow: 0 0 0 #14532d;
         }
+        .btn-moviles-admin {
+            background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 100%);
+            box-shadow: 0 4px 0 #4c1d95;
+        }
+        .btn-moviles-admin:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #4c1d95;
+        }
         .btn-nube-admin {
             background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
             box-shadow: 0 4px 0 #92400e;
@@ -159,6 +178,24 @@
         .btn-salir:active {
             transform: translateY(4px);
             box-shadow: 0 0 0 #0f172a;
+        }
+
+        /* Barra informativa de Borrador Automático y Cola Offline */
+        .barra-estado-borrador {
+            max-width: 900px;
+            margin: 0 auto 10px auto;
+            background-color: #ecfdf5;
+            border: 1px solid #10b981;
+            color: #065f46;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         /* =========================================================
@@ -295,7 +332,7 @@
             background-color: #eff6ff;
         }
 
-        /* Buscador predictivo de Clientes (Solo muestra nombres, nunca CUIT a custodios) */
+        /* Buscador predictivo de Clientes */
         .contenedor-cliente-predictivo {
             position: relative;
             width: 100%;
@@ -428,7 +465,7 @@
             flex: 1;
         }
 
-        /* Área de Firma Digital a la izquierda + Apellido/Nombre y DNI a la derecha */
+        /* Área de Firma Digital */
         .firma-container {
             border: 1px solid #000;
             margin-top: 8px;
@@ -514,6 +551,14 @@
             transform: translateY(6px);
             box-shadow: 0 0px 0 #4c1d95, 0 2px 5px rgba(0,0,0,0.3);
         }
+        .btn-excel-admin {
+            background: linear-gradient(180deg, #0d9488 0%, #0f766e 100%);
+            box-shadow: 0 6px 0 #115e59, 0 8px 15px rgba(0,0,0,0.3);
+        }
+        .btn-excel-admin:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 #115e59, 0 2px 5px rgba(0,0,0,0.3);
+        }
         .btn-respaldo-cloud {
             background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
             box-shadow: 0 6px 0 #075985, 0 8px 15px rgba(0,0,0,0.3);
@@ -562,7 +607,7 @@
         }
 
         /* =========================================================
-           VENTANAS EMERGENTES (HISTORIAL, USUARIOS, CLIENTES Y NUBE)
+           VENTANAS EMERGENTES (HISTORIAL, USUARIOS, CLIENTES, MÓVILES Y NUBE)
            ========================================================= */
         .modal-fondo {
             display: none;
@@ -575,7 +620,7 @@
         }
         .modal-contenido {
             background-color: #ffffff;
-            max-width: 940px;
+            max-width: 950px;
             margin: 10px auto;
             padding: 20px;
             border: 3px solid #000;
@@ -616,6 +661,7 @@
             margin-bottom: 10px;
             border-radius: 4px;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
             flex-wrap: wrap;
         }
@@ -701,6 +747,25 @@
             text-align: center;
         }
 
+        .tag-estado-drive {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+        .tag-drive-ok {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+        .tag-drive-pendiente {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
         @media (max-width: 650px) {
             .tabla-responsive,
             .tabla-responsive tbody,
@@ -740,27 +805,37 @@
 </div>
 
 <!-- =========================================================
-     2. BARRA SUPERIOR DE SESIÓN ACTIVA
+     2. BARRA SUPERIOR DE SESIÓN ACTIVA Y ESTADO DE SEÑAL
      ========================================================= -->
 <div class="barra-usuario">
     <div class="info-sesion">
         <span>👤 USUARIO: <span id="lblNombreUsuario">-</span></span>
         <span id="lblRolUsuario" class="badge-rol">ROL</span>
+        <span id="lblEstadoConexion" class="badge-conexion">🟢 EN LÍNEA</span>
     </div>
     <div class="botones-sesion">
         <button type="button" id="btnGestionarUsuarios" class="btn-top-3d btn-usuarios-admin" style="display: none;" onclick="abrirModalUsuarios()">
-            👥 CREAR / GESTIONAR USUARIOS
+            👥 CUSTODIOS / USUARIOS
         </button>
         <button type="button" id="btnGestionarClientes" class="btn-top-3d btn-clientes-admin" style="display: none;" onclick="abrirModalClientes()">
-            🏢 GESTIONAR CLIENTES
+            🏢 CLIENTES
+        </button>
+        <button type="button" id="btnGestionarMoviles" class="btn-top-3d btn-moviles-admin" style="display: none;" onclick="abrirModalMoviles()">
+            🚓 MÓVILES
         </button>
         <button type="button" id="btnConfigNube" class="btn-top-3d btn-nube-admin" style="display: none;" onclick="abrirModalNube()">
-            ☁️ CONEXIÓN DRIVE ACTIVA
+            ☁️ DRIVE ACTIVO
         </button>
         <button type="button" class="btn-top-3d btn-salir" onclick="cerrarSesion()">
             🔒 CAMBIAR USUARIO
         </button>
     </div>
+</div>
+
+<!-- BARRA DE BORRADOR AUTOMÁTICO EN VIVO + COLA OFFLINE -->
+<div class="barra-estado-borrador">
+    <span id="lblEstadoBorrador">💾 BORRADOR AUTOMÁTICO ACTIVO: Todo lo que escribas queda guardado aunque se apague o cierre el celular.</span>
+    <span id="lblColaOffline" style="color: #b45309; display: none;">⏳ HOJAS PENDIENTES DE SEÑAL: 0</span>
 </div>
 
 <div id="mensajeExito" class="alerta-guardado">
@@ -779,9 +854,11 @@
     </div>
 </div>
 
-<!-- LISTAS PREDICTIVAS DE CUSTODIOS PARA AUTOCOMPLETADO -->
+<!-- LISTAS PREDICTIVAS DE CUSTODIOS Y MÓVILES PARA AUTOCOMPLETADO -->
 <datalist id="listaDniCustodios"></datalist>
 <datalist id="listaNombresCustodios"></datalist>
+<datalist id="listaNumerosMoviles"></datalist>
+<datalist id="listaPatentesMoviles"></datalist>
 
 <!-- =========================================================
      3. CONTENEDOR DE LA HOJA DE RUTA
@@ -870,7 +947,7 @@
                 </td>
                 <td>
                     <span class="etiqueta-celda">NÚMERO DE MÓVIL:</span>
-                    <input type="text" data-campo="numMovil">
+                    <input type="text" id="inputNumMovil" data-campo="numMovil" list="listaNumerosMoviles" placeholder="N° DE MÓVIL">
                 </td>
             </tr>
             <tr>
@@ -884,7 +961,7 @@
                 </td>
                 <td>
                     <span class="etiqueta-celda">PATENTE:</span>
-                    <input type="text" data-campo="patenteMovil">
+                    <input type="text" id="inputPatenteMovil" data-campo="patenteMovil" list="listaPatentesMoviles" placeholder="PATENTE DEL MÓVIL">
                 </td>
             </tr>
         </tbody>
@@ -1051,7 +1128,10 @@
     <button type="button" class="btn-3d btn-historial-modal" id="btnAbrirHistorial" onclick="abrirModalHistorial()">
         📂 VER HISTORIAL DE HOJAS DE RUTA
     </button>
-    <button type="button" class="btn-3d btn-respaldo-cloud" id="btnRespaldoOneDrive" onclick="respaldarEnOneDriveCorporativo()">
+    <button type="button" class="btn-3d btn-excel-admin" id="btnExportarExcelPrincipal" style="display: none;" onclick="exportarHistorialAExcel()">
+        📊 EXPORTAR EXCEL (FACTURACIÓN)
+    </button>
+    <button type="button" class="btn-3d btn-respaldo-cloud" id="btnRespaldoOneDrive" style="display: none;" onclick="respaldarEnOneDriveCorporativo()">
         📤 RESPALDO ONEDRIVE / PC
     </button>
     <button type="button" class="btn-3d btn-limpiar" onclick="limpiarFormulario()">
@@ -1060,7 +1140,7 @@
 </div>
 
 <!-- =========================================================
-     5. VENTANA EMERGENTE DEL HISTORIAL (CON BUSCADOR POR DNI, NOMBRE, EMPRESA, ETC.)
+     5. VENTANA EMERGENTE DEL HISTORIAL (BUSCADOR, ESTADO DRIVE Y EXPORTACIÓN EXCEL)
      ========================================================= -->
 <div id="modalHistorial" class="modal-fondo">
     <div class="modal-contenido">
@@ -1070,10 +1150,15 @@
         </div>
 
         <div id="barraFiltroAdmin" class="barra-filtro-admin">
-            <span style="font-weight: bold; font-size: 12px; white-space: nowrap;">FILTRAR POR USUARIO:</span>
-            <select id="selectFiltroUsuario" onchange="mostrarHistorial()" style="max-width: 260px;">
-                <option value="TODOS">VER TODOS LOS USUARIOS</option>
-            </select>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-weight: bold; font-size: 12px; white-space: nowrap;">FILTRAR POR USUARIO:</span>
+                <select id="selectFiltroUsuario" onchange="mostrarHistorial()" style="max-width: 250px;">
+                    <option value="TODOS">VER TODOS LOS USUARIOS</option>
+                </select>
+            </div>
+            <button type="button" class="btn-accion-chico btn-descargar-item" style="width: auto; padding: 8px 14px;" onclick="exportarHistorialAExcel()">
+                📊 DESCARGAR EXCEL DE ESTA VISTA
+            </button>
         </div>
 
         <!-- BUSCADOR INTELIGENTE EN VIVO -->
@@ -1086,10 +1171,10 @@
         <table class="tabla-responsive">
             <thead>
                 <tr>
-                    <th style="width: 12%;">N° HOJA</th>
+                    <th style="width: 13%;">N° HOJA / ESTADO</th>
                     <th style="width: 12%;">FECHA</th>
                     <th style="width: 14%;">CREADO POR</th>
-                    <th style="width: 16%;">CLIENTE</th>
+                    <th style="width: 15%;">CLIENTE</th>
                     <th style="width: 23%;">JJEE / AUX / MÓVIL</th>
                     <th style="width: 10%;">HORAS EXC.</th>
                     <th style="width: 13%;">ACCIONES</th>
@@ -1101,7 +1186,7 @@
 </div>
 
 <!-- =========================================================
-     6. VENTANA EMERGENTE DE GESTIÓN DE USUARIOS / CUSTODIOS (CON CUIT/DNI Y NOMBRE COMPLETO)
+     6. VENTANA EMERGENTE DE GESTIÓN DE CUSTODIOS / USUARIOS
      ========================================================= -->
 <div id="modalUsuarios" class="modal-fondo">
     <div class="modal-contenido" style="max-width: 880px;">
@@ -1175,7 +1260,7 @@
         </div>
 
         <p style="font-size: 12px; color: #1e293b; background: #f1f5f9; padding: 8px 10px; border-left: 4px solid #143627; margin-top: 0;">
-            🔒 <b>CONFIDENCIALIDAD ACTIVA:</b> El CUIT de la empresa solo es visible en esta pantalla de Administrador. A los custodios únicamente les aparecerá el <b>Nombre de la Empresa</b> para elegirlo en la Hoja de Ruta.
+            🔒 <b>CONFIDENCIALIDAD ACTIVA:</b> El CUIT de la empresa solo es visible en esta pantalla de Administrador y en tu exportación a Excel. A los custodios únicamente les aparecerá el <b>Nombre de la Empresa</b>.
         </p>
 
         <div id="avisoEdicionCliente" class="aviso-edicion-user">
@@ -1220,7 +1305,62 @@
 </div>
 
 <!-- =========================================================
-     8. VENTANA DE CONEXIÓN A CARPETAS AUTOMÁTICAS EN GOOGLE DRIVE
+     8. VENTANA EMERGENTE DE PADRÓN DE MÓVILES Y PATENTES (SOLO ADMIN)
+     ========================================================= -->
+<div id="modalMoviles" class="modal-fondo">
+    <div class="modal-contenido" style="max-width: 700px;">
+        <div class="modal-cabecera">
+            <h3>PADRÓN DE MÓVILES Y PATENTES (SOLO ADMINISTRADOR)</h3>
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalMoviles()">✖ CERRAR</button>
+        </div>
+
+        <p style="font-size: 12px; color: #1e293b; background: #f1f5f9; padding: 8px 10px; border-left: 4px solid #7c3aed; margin-top: 0;">
+            🚓 Cuando el custodio escriba el <b>Número de Móvil</b> en la Hoja de Ruta, se completará automáticamente su <b>Patente</b> (y viceversa).
+        </p>
+
+        <div id="avisoEdicionMovil" class="aviso-edicion-user">
+            ✏️ MODIFICANDO EL MÓVIL: <span id="lblMovilEnEdicion"></span>
+        </div>
+
+        <table style="margin-bottom: 15px;">
+            <tbody>
+                <tr>
+                    <td style="width: 38%;">
+                        <span class="etiqueta-celda">NÚMERO DE MÓVIL:</span>
+                        <input type="text" id="nuevoMovilNumero" placeholder="EJ: 14">
+                    </td>
+                    <td style="width: 37%;">
+                        <span class="etiqueta-celda">PATENTE DEL MÓVIL:</span>
+                        <input type="text" id="nuevoMovilPatente" placeholder="EJ: AF 123 CD">
+                    </td>
+                    <td style="width: 25%; text-align: center;">
+                        <button type="button" id="btnGuardarMovilModal" class="btn-accion-chico btn-descargar-item" style="width: 100%; padding: 10px;" onclick="guardarOCrearMovil()">
+                            + AGREGAR MÓVIL
+                        </button>
+                        <button type="button" id="btnCancelarEdicionMovil" class="btn-accion-chico btn-salir" style="width: 100%; padding: 6px; margin-top: 5px; display: none;" onclick="cancelarModoEdicionMovil()">
+                            CANCELAR EDICIÓN
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="seccion-titulo" style="margin-top: 0;">MÓVILES REGISTRADOS</div>
+        <table class="tabla-responsive">
+            <thead>
+                <tr>
+                    <th style="width: 38%;">NÚMERO DE MÓVIL</th>
+                    <th style="width: 37%;">PATENTE</th>
+                    <th style="width: 25%;">ACCIÓN</th>
+                </tr>
+            </thead>
+            <tbody id="tablaListaMoviles"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- =========================================================
+     9. VENTANA DE CONEXIÓN A CARPETAS AUTOMÁTICAS EN GOOGLE DRIVE
      ========================================================= -->
 <div id="modalNube" class="modal-fondo">
     <div class="modal-contenido" style="max-width: 680px;">
@@ -1229,7 +1369,7 @@
             <button type="button" class="btn-cerrar-modal" onclick="cerrarModalNube()">✖ CERRAR</button>
         </div>
         <p style="font-size: 13px; color: #1e293b; line-height: 1.5; margin-top: 0;">
-            Tu enlace de Google Drive ya está grabado de forma fija en el sistema. Cada vez que se toca <b>"GUARDAR HOJA DE RUTA"</b>, el sistema crea automáticamente la carpeta <b>Hoja de ruta &gt; Año 2026 &gt; Octubre / Noviembre</b> y guarda el PDF adentro.
+            Tu enlace de Google Drive ya está grabado de forma fija en el sistema. Cada vez que se toca <b>"GUARDAR HOJA DE RUTA"</b>, el sistema reserva un número único sin duplicados, crea automáticamente la carpeta <b>Hoja de ruta &gt; Año 2026 &gt; Octubre / Noviembre</b> y guarda el PDF adentro.
         </p>
         <div style="margin-bottom: 15px;">
             <span class="etiqueta-celda">URL ACTIVA DE TU SERVIDOR GOOGLE APPS SCRIPT:</span>
@@ -1291,7 +1431,6 @@
         } catch (e) {}
     }
 
-    // Asegurar que la URL nueva quede siempre activa
     guardarStorageSeguro('urlNubeGoogleDriveLince', URL_NUBE_FIJA_LINCE);
 
     function obtenerUrlActivaNube() {
@@ -1299,11 +1438,12 @@
     }
 
     // =========================================================
-    // 1. SISTEMA DE LOGIN, USUARIOS (CON CUIT/DNI Y NOMBRE) Y CLIENTES
+    // 1. SISTEMA DE LOGIN, USUARIOS, CLIENTES Y MÓVILES
     // =========================================================
     let usuarioActivo = null;
     let indiceUsuarioEditando = null;
     let indiceClienteEditando = null;
+    let indiceMovilEditando = null;
 
     function obtenerListaUsuarios() {
         let usuarios = [];
@@ -1342,57 +1482,49 @@
         return clientes;
     }
 
-    async function guardarUsuariosEnNube(listaUsuarios) {
+    function obtenerListaMoviles() {
+        let moviles = [];
         try {
-            const urlActiva = obtenerUrlActivaNube();
-            const cuerpo = JSON.stringify({
-                accion: 'guardarUsuarios',
-                usuarios: listaUsuarios
+            moviles = JSON.parse(leerStorageSeguro('movilesLince', '[]'));
+            if (!Array.isArray(moviles)) moviles = [];
+        } catch (e) {
+            moviles = [];
+        }
+        return moviles;
+    }
+
+    async function enviarAccionPostNube(cuerpoObj) {
+        const urlActiva = obtenerUrlActivaNube();
+        const cuerpo = JSON.stringify(cuerpoObj);
+        try {
+            await fetch(urlActiva, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: cuerpo
             });
-            try {
-                await fetch(urlActiva, {
-                    method: 'POST',
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: cuerpo
-                });
-            } catch (errCors) {
-                await fetch(urlActiva, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: cuerpo
-                });
-            }
-        } catch (e) {}
+        } catch (errCors) {
+            await fetch(urlActiva, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: cuerpo
+            });
+        }
+    }
+
+    async function guardarUsuariosEnNube(listaUsuarios) {
+        try { await enviarAccionPostNube({ accion: 'guardarUsuarios', usuarios: listaUsuarios }); } catch (e) {}
     }
 
     async function guardarClientesEnNube(listaClientes) {
-        try {
-            const urlActiva = obtenerUrlActivaNube();
-            const cuerpo = JSON.stringify({
-                accion: 'guardarClientes',
-                clientes: listaClientes
-            });
-            try {
-                await fetch(urlActiva, {
-                    method: 'POST',
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: cuerpo
-                });
-            } catch (errCors) {
-                await fetch(urlActiva, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: cuerpo
-                });
-            }
-        } catch (e) {}
+        try { await enviarAccionPostNube({ accion: 'guardarClientes', clientes: listaClientes }); } catch (e) {}
     }
 
-    // Fusiona usuarios locales y de la nube conservando CUIT/DNI y Nombres Completos
+    async function guardarMovilesEnNube(listaMoviles) {
+        try { await enviarAccionPostNube({ accion: 'guardarMoviles', moviles: listaMoviles }); } catch (e) {}
+    }
+
     function fusionarUsuariosLocalYNube(listaNube, listaLocal) {
         const mapa = new Map();
         (listaLocal || []).forEach(u => {
@@ -1429,6 +1561,10 @@
             if (data && Array.isArray(data.clientes) && data.clientes.length > 0) {
                 guardarStorageSeguro('clientesLince', JSON.stringify(data.clientes));
             }
+            if (data && Array.isArray(data.moviles) && data.moviles.length > 0) {
+                guardarStorageSeguro('movilesLince', JSON.stringify(data.moviles));
+                actualizarDatalistsMoviles();
+            }
 
             let listaNube = [];
             if (Array.isArray(data)) {
@@ -1449,7 +1585,102 @@
     }
 
     // =========================================================
-    // 1.B AUTOCOMPLETADO DE CUSTODIOS POR DNI / CUIT O NOMBRE
+    // 1.B BORRADOR AUTOMÁTICO EN VIVO (NO PIERDE EL PRECARGADO HASTA FINALIZAR)
+    // =========================================================
+    function obtenerClaveBorradorUsuario() {
+        const userKey = usuarioActivo && usuarioActivo.username ? usuarioActivo.username : 'GENERAL';
+        return 'borradorEnVivoLince_' + userKey;
+    }
+
+    function guardarBorradorEnVivo() {
+        if (!usuarioActivo) return;
+        const datosBorrador = {};
+        let tieneAlgunDato = false;
+
+        document.querySelectorAll('[data-campo]').forEach(el => {
+            const campo = el.getAttribute('data-campo');
+            if (campo === 'numHoja') return;
+            const val = (el.value || '').trim().toUpperCase();
+            datosBorrador[campo] = val;
+            if (campo !== 'cliente' && campo !== 'fecha' && val !== '') {
+                tieneAlgunDato = true;
+            }
+        });
+
+        if (hayFirmaDibujada) {
+            try {
+                datosBorrador.firma = canvas.toDataURL('image/png');
+                tieneAlgunDato = true;
+            } catch (e) {}
+        } else {
+            datosBorrador.firma = '';
+        }
+
+        datosBorrador.actualizado = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        guardarStorageSeguro(obtenerClaveBorradorUsuario(), JSON.stringify(datosBorrador));
+
+        const lbl = document.getElementById('lblEstadoBorrador');
+        if (lbl && tieneAlgunDato) {
+            lbl.innerText = `💾 BORRADOR PRECARGADO GUARDADO (${datosBorrador.actualizado}): No se perderá aunque cierres el navegador.`;
+        }
+    }
+
+    function restaurarBorradorEnVivo() {
+        if (!usuarioActivo) return;
+        const raw = leerStorageSeguro(obtenerClaveBorradorUsuario(), '');
+        if (!raw) return;
+
+        try {
+            const b = JSON.parse(raw);
+            if (!b || typeof b !== 'object') return;
+
+            let habiaDatosReales = false;
+            Object.keys(b).forEach(k => {
+                if (k !== 'cliente' && k !== 'fecha' && k !== 'actualizado' && k !== 'firma' && b[k]) {
+                    habiaDatosReales = true;
+                }
+            });
+            if (b.firma) habiaDatosReales = true;
+            if (!habiaDatosReales) return;
+
+            document.querySelectorAll('[data-campo]').forEach(el => {
+                const c = el.getAttribute('data-campo');
+                if (c === 'numHoja') return;
+                if (b[c] !== undefined && b[c] !== '') {
+                    el.value = b[c];
+                }
+            });
+
+            if (b.firma) {
+                const img = new Image();
+                img.onload = () => {
+                    if (canvas.width === 0) inicializarCanvas();
+                    ctx.drawImage(img, 0, 0);
+                    hayFirmaDibujada = true;
+                };
+                img.src = b.firma;
+            }
+
+            const lbl = document.getElementById('lblEstadoBorrador');
+            if (lbl) {
+                lbl.innerText = `✅ PRECARGADO RECUPERADO AUTOMÁTICAMENTE: Podés continuar completando la Hoja de Ruta hasta finalizar.`;
+            }
+        } catch (e) {}
+    }
+
+    function borrarBorradorEnVivoActual() {
+        try {
+            localStorage.removeItem(obtenerClaveBorradorUsuario());
+        } catch (e) {}
+        delete memoriaRespaldoRAM[obtenerClaveBorradorUsuario()];
+        const lbl = document.getElementById('lblEstadoBorrador');
+        if (lbl) {
+            lbl.innerText = `💾 BORRADOR AUTOMÁTICO ACTIVO: Todo lo que escribas queda guardado aunque se apague o cierre el celular.`;
+        }
+    }
+
+    // =========================================================
+    // 1.C TRIPLE AUTOCOMPLETADO: CUSTODIOS (DNI/CUIT), MÓVILES Y CLIENTES
     // =========================================================
     function soloDigitos(str) {
         return String(str || '').replace(/\D/g, '');
@@ -1480,6 +1711,18 @@
         }
     }
 
+    function actualizarDatalistsMoviles() {
+        const moviles = obtenerListaMoviles();
+        const dlNum = document.getElementById('listaNumerosMoviles');
+        const dlPat = document.getElementById('listaPatentesMoviles');
+        if (dlNum) {
+            dlNum.innerHTML = moviles.map(m => `<option value="${m.numero}">PATENTE: ${m.patente || '-'}</option>`).join('');
+        }
+        if (dlPat) {
+            dlPat.innerHTML = moviles.map(m => `<option value="${m.patente}">MÓVIL N°: ${m.numero || '-'}</option>`).join('');
+        }
+    }
+
     function buscarCustodioPorDniOCuit(valorInput) {
         const buscadoDig = soloDigitos(valorInput);
         if (buscadoDig.length < 7) return null;
@@ -1504,11 +1747,13 @@
         ) || null;
     }
 
-    function inicializarAutocompletadoCustodios() {
+    function inicializarAutocompletadoCustodiosYMoviles() {
         const inpCuitJjee = document.getElementById('inputCuitJjee');
         const inpNomJjee = document.getElementById('inputNombreJjee');
         const inpCuitAux = document.getElementById('inputCuitAux');
         const inpNomAux = document.getElementById('inputNombreAux');
+        const inpNumMovil = document.getElementById('inputNumMovil');
+        const inpPatMovil = document.getElementById('inputPatenteMovil');
 
         if (inpCuitJjee && inpNomJjee) {
             const completarJjeePorDni = () => {
@@ -1516,6 +1761,7 @@
                 if (cust) {
                     inpNomJjee.value = (cust.nombreCompleto || cust.username).toUpperCase();
                     inpNomJjee.classList.add('campo-auto');
+                    guardarBorradorEnVivo();
                 }
             };
             inpCuitJjee.addEventListener('input', completarJjeePorDni);
@@ -1525,6 +1771,7 @@
                     inpNomJjee.value = (cust.nombreCompleto || cust.username).toUpperCase();
                     if (cust.cuitDni) inpCuitJjee.value = cust.cuitDni.toUpperCase();
                     inpNomJjee.classList.add('campo-auto');
+                    guardarBorradorEnVivo();
                 }
             });
 
@@ -1536,6 +1783,7 @@
                         inpCuitJjee.value = cust.cuitDni.toUpperCase();
                         inpCuitJjee.classList.add('campo-auto');
                     }
+                    guardarBorradorEnVivo();
                 }
             });
         }
@@ -1546,6 +1794,7 @@
                 if (cust) {
                     inpNomAux.value = (cust.nombreCompleto || cust.username).toUpperCase();
                     inpNomAux.classList.add('campo-auto');
+                    guardarBorradorEnVivo();
                 }
             };
             inpCuitAux.addEventListener('input', completarAuxPorDni);
@@ -1555,6 +1804,7 @@
                     inpNomAux.value = (cust.nombreCompleto || cust.username).toUpperCase();
                     if (cust.cuitDni) inpCuitAux.value = cust.cuitDni.toUpperCase();
                     inpNomAux.classList.add('campo-auto');
+                    guardarBorradorEnVivo();
                 }
             });
 
@@ -1566,14 +1816,35 @@
                         inpCuitAux.value = cust.cuitDni.toUpperCase();
                         inpCuitAux.classList.add('campo-auto');
                     }
+                    guardarBorradorEnVivo();
+                }
+            });
+        }
+
+        if (inpNumMovil && inpPatMovil) {
+            inpNumMovil.addEventListener('input', () => {
+                const num = inpNumMovil.value.trim().toUpperCase();
+                if (!num) return;
+                const m = obtenerListaMoviles().find(x => String(x.numero).trim().toUpperCase() === num);
+                if (m && m.patente) {
+                    inpPatMovil.value = m.patente.toUpperCase();
+                    inpPatMovil.classList.add('campo-auto');
+                    guardarBorradorEnVivo();
+                }
+            });
+            inpPatMovil.addEventListener('change', () => {
+                const pat = inpPatMovil.value.trim().toUpperCase();
+                if (!pat) return;
+                const m = obtenerListaMoviles().find(x => String(x.patente).trim().toUpperCase() === pat);
+                if (m && m.numero) {
+                    inpNumMovil.value = m.numero.toUpperCase();
+                    inpNumMovil.classList.add('campo-auto');
+                    guardarBorradorEnVivo();
                 }
             });
         }
     }
 
-    // =========================================================
-    // 1.C BUSCADOR PREDICTIVO DE CLIENTES (SIN MOSTRAR CUIT A CUSTODIOS)
-    // =========================================================
     function inicializarPredictivoClientes() {
         const inpCliente = document.getElementById('clientePredeterminado');
         const popup = document.getElementById('popupClientesPredilectos');
@@ -1591,7 +1862,6 @@
                 return;
             }
 
-            // IMPORTANTE: Solo se muestra c.nombre, jamás el CUIT del cliente
             popup.innerHTML = filtrados.map(c => `
                 <div class="item-predictivo-cliente" data-nombre="${String(c.nombre).replace(/"/g, '&quot;')}">
                     🏢 ${c.nombre}
@@ -1603,28 +1873,24 @@
                     ev.preventDefault();
                     inpCliente.value = item.getAttribute('data-nombre');
                     popup.style.display = 'none';
+                    guardarBorradorEnVivo();
                 });
-                item.addEventListener('touchstart', (ev) => {
+                item.addEventListener('touchstart', () => {
                     inpCliente.value = item.getAttribute('data-nombre');
                     popup.style.display = 'none';
+                    guardarBorradorEnVivo();
                 }, { passive: true });
             });
 
             popup.style.display = 'block';
         }
 
-        inpCliente.addEventListener('focus', () => {
-            mostrarSugerenciasClientes('');
-        });
-
-        inpCliente.addEventListener('click', (e) => {
-            e.stopPropagation();
-            mostrarSugerenciasClientes('');
-        });
-
+        inpCliente.addEventListener('focus', () => mostrarSugerenciasClientes(''));
+        inpCliente.addEventListener('click', (e) => { e.stopPropagation(); mostrarSugerenciasClientes(''); });
         inpCliente.addEventListener('input', () => {
             inpCliente.value = inpCliente.value.toUpperCase();
             mostrarSugerenciasClientes(inpCliente.value);
+            guardarBorradorEnVivo();
         });
 
         document.addEventListener('click', (e) => {
@@ -1678,10 +1944,12 @@
 
         document.getElementById('pantallaLogin').style.display = 'none';
         aplicarInterfazPorUsuario();
+        restaurarBorradorEnVivo();
         sincronizarEstadoCompletoConNube(true);
     }
 
     function cerrarSesion() {
+        guardarBorradorEnVivo();
         usuarioActivo = null;
         borrarSesionSegura('sesionActivaLince');
         document.getElementById('loginUsuario').value = '';
@@ -1703,22 +1971,27 @@
         const lblRol = document.getElementById('lblRolUsuario');
         const btnUsuarios = document.getElementById('btnGestionarUsuarios');
         const btnClientes = document.getElementById('btnGestionarClientes');
+        const btnMoviles = document.getElementById('btnGestionarMoviles');
         const btnNube = document.getElementById('btnConfigNube');
         const btnResetNum = document.getElementById('btnResetNumero');
         const btnRespaldo = document.getElementById('btnRespaldoOneDrive');
+        const btnExcel = document.getElementById('btnExportarExcelPrincipal');
         const barraFiltro = document.getElementById('barraFiltroAdmin');
         const tituloModal = document.getElementById('tituloModalHistorial');
 
         actualizarDatalistsCustodios();
+        actualizarDatalistsMoviles();
 
         if (usuarioActivo.rol === 'ADMIN') {
             lblRol.innerText = 'ADMINISTRADOR (CONTROL TOTAL)';
             lblRol.style.backgroundColor = '#16a34a';
             btnUsuarios.style.display = 'inline-block';
             btnClientes.style.display = 'inline-block';
+            btnMoviles.style.display = 'inline-block';
             btnNube.style.display = 'inline-block';
             btnResetNum.style.display = 'inline-block';
             if (btnRespaldo) btnRespaldo.style.display = 'inline-block';
+            if (btnExcel) btnExcel.style.display = 'inline-block';
             barraFiltro.style.display = 'flex';
             tituloModal.innerText = 'HISTORIAL GENERAL DE TODAS LAS HOJAS DE RUTA (MODO ADMIN)';
             actualizarSelectorFiltroUsuarios();
@@ -1727,13 +2000,14 @@
             lblRol.style.backgroundColor = '#2563eb';
             btnUsuarios.style.display = 'none';
             btnClientes.style.display = 'none';
+            btnMoviles.style.display = 'none';
             btnNube.style.display = 'none';
             btnResetNum.style.display = 'none';
             if (btnRespaldo) btnRespaldo.style.display = 'none';
+            if (btnExcel) btnExcel.style.display = 'none';
             barraFiltro.style.display = 'none';
             tituloModal.innerText = `MIS HOJAS DE RUTA GUARDADAS (USUARIO: ${usuarioActivo.username})`;
 
-            // Si el custodio que entró tiene cargado su Nombre Completo o CUIT/DNI, lo autocompleta en JJEE
             const inpNomJjee = document.getElementById('inputNombreJjee');
             const inpCuitJjee = document.getElementById('inputCuitJjee');
             if (inpNomJjee && !inpNomJjee.value) {
@@ -1746,6 +2020,7 @@
 
         setTimeout(() => {
             if (!hayFirmaDibujada) inicializarCanvas();
+            restaurarBorradorEnVivo();
         }, 60);
 
         mostrarHistorial();
@@ -1831,7 +2106,7 @@
     }
 
     // =========================================================
-    // 3. CONTADOR AUTOMÁTICO CORRELATIVO E HISTORIAL EN NUBE
+    // 3. CONTADOR CORRELATIVO BLINDADO, SINCRONIZACIÓN Y COLA OFFLINE
     // =========================================================
     function inicializarContadorHojaDeRuta() {
         if (!leerStorageSeguro('contadorResetA0_v1', '')) {
@@ -1858,17 +2133,122 @@
         guardarStorageSeguro('proximoNumHojaLince', '0');
         actualizarInputNumeroHoja();
         try {
-            await fetch(obtenerUrlActivaNube(), {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ accion: 'reiniciarContador' })
+            await enviarAccionPostNube({ accion: 'reiniciarContador' });
+        } catch (e) {}
+    }
+
+    // Reserva atómica de número con LockService en Google Apps Script antes de emitir el PDF
+    async function reservarNumeroUnicoEnNube(numLocalPropuesto) {
+        if (!navigator.onLine) return null;
+        try {
+            const u = obtenerUrlActivaNube();
+            const sep = u.includes('?') ? '&' : '?';
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 4500);
+            const resp = await fetch(`${u}${sep}accion=reservarNumero&numLocal=${encodeURIComponent(numLocalPropuesto)}&t=${Date.now()}`, {
+                method: 'GET',
+                redirect: 'follow',
+                signal: ctrl.signal
             });
+            clearTimeout(timer);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && data.ok && data.numHojaAsignado) {
+                    if (data.proximoNumHoja !== undefined) {
+                        guardarStorageSeguro('proximoNumHojaLince', String(data.proximoNumHoja));
+                        actualizarInputNumeroHoja();
+                    }
+                    return String(data.numHojaAsignado);
+                }
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    function obtenerColaOffline() {
+        try {
+            const c = JSON.parse(leerStorageSeguro('colaOfflineLince', '[]'));
+            return Array.isArray(c) ? c : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function guardarColaOffline(cola) {
+        guardarStorageSeguro('colaOfflineLince', JSON.stringify(cola));
+        actualizarIndicadorConexionYCola();
+    }
+
+    function actualizarIndicadorConexionYCola() {
+        const lblCon = document.getElementById('lblEstadoConexion');
+        const lblCola = document.getElementById('lblColaOffline');
+        const cola = obtenerColaOffline();
+
+        if (lblCon) {
+            if (navigator.onLine) {
+                lblCon.innerText = '🟢 EN LÍNEA (24/7)';
+                lblCon.classList.remove('offline');
+            } else {
+                lblCon.innerText = '🟠 MODO OFFLINE (GUARDA EN CELULAR)';
+                lblCon.classList.add('offline');
+            }
+        }
+        if (lblCola) {
+            if (cola.length > 0) {
+                lblCola.style.display = 'inline-block';
+                lblCola.innerText = `⏳ PENDIENTES DE SUBIR A DRIVE: ${cola.length}`;
+            } else {
+                lblCola.style.display = 'none';
+            }
+        }
+    }
+
+    let procesandoColaOffline = false;
+    async function procesarColaOffline() {
+        if (procesandoColaOffline || !navigator.onLine) return;
+        const cola = obtenerColaOffline();
+        if (cola.length === 0) return;
+
+        procesandoColaOffline = true;
+        try {
+            const restantes = [];
+            for (let i = 0; i < cola.length; i++) {
+                const itemCola = cola[i];
+                const exito = await enviarACarpetasAutomaticasEnNube(
+                    itemCola.datosHoja,
+                    obtenerUrlActivaNube(),
+                    itemCola.nombreCarpetaAnio,
+                    itemCola.nombreCarpetaMes
+                );
+                if (exito) {
+                    marcarHojaComoSubidaEnHistorialLocal(itemCola.datosHoja.id);
+                } else {
+                    restantes.push(itemCola);
+                }
+            }
+            guardarColaOffline(restantes);
+            mostrarHistorial();
+        } finally {
+            procesandoColaOffline = false;
+        }
+    }
+
+    function marcarHojaComoSubidaEnHistorialLocal(idHoja) {
+        try {
+            let hist = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
+            hist.forEach(h => {
+                if (String(h.id) === String(idHoja)) h.subidoADrive = true;
+            });
+            guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(hist));
         } catch (e) {}
     }
 
     let sincronizandoEstadoLince = false;
     async function sincronizarEstadoCompletoConNube(subirLocal = true) {
+        actualizarIndicadorConexionYCola();
+        if (!navigator.onLine) return;
+        await procesarColaOffline();
+
         if (sincronizandoEstadoLince) return;
         sincronizandoEstadoLince = true;
         try {
@@ -1878,12 +2258,7 @@
             const nLocal = parseInt(leerStorageSeguro('proximoNumHojaLince', '0'), 10) || 0;
 
             if (subirLocal && (hLocal.length > 0 || nLocal > 0)) {
-                await fetch(u, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ accion: 'sincronizarEstado', proximoNumHoja: nLocal, historial: hLocal })
-                });
+                await enviarAccionPostNube({ accion: 'sincronizarEstado', proximoNumHoja: nLocal, historial: hLocal });
             }
 
             const sep = u.includes('?') ? '&' : '?';
@@ -1901,11 +2276,25 @@
                     guardarStorageSeguro('clientesLince', JSON.stringify(d.clientes));
                 }
 
+                if (d && Array.isArray(d.moviles) && d.moviles.length > 0) {
+                    guardarStorageSeguro('movilesLince', JSON.stringify(d.moviles));
+                    actualizarDatalistsMoviles();
+                }
+
                 if (d && Array.isArray(d.historial)) {
                     const elim = Array.isArray(d.idsEliminados) ? d.idsEliminados.map(String) : [];
                     const mapa = new Map();
-                    d.historial.forEach(x => { if (x && x.id && !elim.includes(String(x.id))) mapa.set(String(x.id), x); });
-                    hLocal.forEach(x => { if (x && x.id && !mapa.has(String(x.id)) && !elim.includes(String(x.id))) mapa.set(String(x.id), x); });
+                    d.historial.forEach(x => {
+                        if (x && x.id && !elim.includes(String(x.id))) {
+                            x.subidoADrive = true;
+                            mapa.set(String(x.id), x);
+                        }
+                    });
+                    hLocal.forEach(x => {
+                        if (x && x.id && !mapa.has(String(x.id)) && !elim.includes(String(x.id))) {
+                            mapa.set(String(x.id), x);
+                        }
+                    });
                     const unido = Array.from(mapa.values()).sort((a, b) => (b.id || 0) - (a.id || 0));
                     guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(unido));
 
@@ -1925,7 +2314,7 @@
     }
 
     // =========================================================
-    // 4. GESTIÓN DE CUSTODIOS / USUARIOS (CON CUIT/DNI Y NOMBRE COMPLETO)
+    // 4. GESTIÓN DE CUSTODIOS / USUARIOS, CLIENTES Y MÓVILES
     // =========================================================
     async function abrirModalUsuarios() {
         if (!usuarioActivo || usuarioActivo.rol !== 'ADMIN') return;
@@ -2098,9 +2487,7 @@
             usuarios.map(u => `<option value="${u.username}">${u.username} - ${u.nombreCompleto || ''}</option>`).join('');
     }
 
-    // =========================================================
-    // 4.B GESTIÓN DE CLIENTES / EMPRESAS (CUIT CONFIDENCIAL SOLO ADMIN)
-    // =========================================================
+    // --- CLIENTES ---
     async function abrirModalClientes() {
         if (!usuarioActivo || usuarioActivo.rol !== 'ADMIN') return;
         cancelarModoEdicionCliente();
@@ -2208,8 +2595,121 @@
         `).join('');
     }
 
+    // --- PADRÓN DE MÓVILES Y PATENTES ---
+    async function abrirModalMoviles() {
+        if (!usuarioActivo || usuarioActivo.rol !== 'ADMIN') return;
+        cancelarModoEdicionMovil();
+        renderizarTablaMoviles();
+        document.getElementById('modalMoviles').style.display = 'block';
+        await sincronizarUsuariosDesdeNube();
+        renderizarTablaMoviles();
+    }
+
+    function cerrarModalMoviles() {
+        cancelarModoEdicionMovil();
+        document.getElementById('modalMoviles').style.display = 'none';
+    }
+
+    function seleccionarMovilParaModificar(index) {
+        const moviles = obtenerListaMoviles();
+        const m = moviles[index];
+        if (!m) return;
+
+        indiceMovilEditando = index;
+        document.getElementById('nuevoMovilNumero').value = m.numero || '';
+        document.getElementById('nuevoMovilPatente').value = m.patente || '';
+
+        document.getElementById('avisoEdicionMovil').style.display = 'block';
+        document.getElementById('lblMovilEnEdicion').innerText = `MÓVIL ${m.numero} (${m.patente})`;
+        document.getElementById('btnGuardarMovilModal').innerText = '💾 GUARDAR CAMBIOS';
+        document.getElementById('btnCancelarEdicionMovil').style.display = 'inline-block';
+        document.getElementById('nuevoMovilNumero').focus();
+    }
+
+    function cancelarModoEdicionMovil() {
+        indiceMovilEditando = null;
+        document.getElementById('nuevoMovilNumero').value = '';
+        document.getElementById('nuevoMovilPatente').value = '';
+        document.getElementById('avisoEdicionMovil').style.display = 'none';
+        document.getElementById('btnGuardarMovilModal').innerText = '+ AGREGAR MÓVIL';
+        document.getElementById('btnCancelarEdicionMovil').style.display = 'none';
+    }
+
+    function guardarOCrearMovil() {
+        const num = document.getElementById('nuevoMovilNumero').value.trim().toUpperCase();
+        const pat = document.getElementById('nuevoMovilPatente').value.trim().toUpperCase();
+
+        if (!num || !pat) {
+            alert('INGRESÁ EL NÚMERO DE MÓVIL Y SU PATENTE.');
+            return;
+        }
+
+        const moviles = obtenerListaMoviles();
+
+        if (indiceMovilEditando !== null) {
+            const movAntiguo = moviles[indiceMovilEditando];
+            if (!movAntiguo) return;
+            movAntiguo.numero = num;
+            movAntiguo.patente = pat;
+            guardarStorageSeguro('movilesLince', JSON.stringify(moviles));
+            guardarMovilesEnNube(moviles);
+            actualizarDatalistsMoviles();
+            cancelarModoEdicionMovil();
+            renderizarTablaMoviles();
+            return;
+        }
+
+        const idxExist = moviles.findIndex(m => String(m.numero).toUpperCase() === num);
+        if (idxExist !== -1) {
+            moviles[idxExist].patente = pat;
+        } else {
+            moviles.push({ numero: num, patente: pat });
+        }
+
+        guardarStorageSeguro('movilesLince', JSON.stringify(moviles));
+        guardarMovilesEnNube(moviles);
+        actualizarDatalistsMoviles();
+        cancelarModoEdicionMovil();
+        renderizarTablaMoviles();
+    }
+
+    function eliminarMovil(index) {
+        const moviles = obtenerListaMoviles();
+        const m = moviles[index];
+        if (!m) return;
+        if (!confirm(`¿ELIMINAR EL MÓVIL "${m.numero}" (${m.patente})?`)) return;
+
+        moviles.splice(index, 1);
+        guardarStorageSeguro('movilesLince', JSON.stringify(moviles));
+        guardarMovilesEnNube(moviles);
+        actualizarDatalistsMoviles();
+        cancelarModoEdicionMovil();
+        renderizarTablaMoviles();
+    }
+
+    function renderizarTablaMoviles() {
+        const tbody = document.getElementById('tablaListaMoviles');
+        const moviles = obtenerListaMoviles();
+        if (moviles.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">NO HAY MÓVILES CARGADOS AÚN</td></tr>';
+            return;
+        }
+        tbody.innerHTML = moviles.map((m, idx) => `
+            <tr>
+                <td style="text-align:center; font-weight:bold; color:#143627;">🚓 MÓVIL ${m.numero}</td>
+                <td style="text-align:center; font-weight:bold;">${m.patente}</td>
+                <td style="text-align:center;">
+                    <div class="acciones-fila-usuarios">
+                        <button type="button" class="btn-accion-chico btn-modificar-user" onclick="seleccionarMovilParaModificar(${idx})">MODIFICAR</button>
+                        <button type="button" class="btn-accion-chico btn-eliminar" onclick="eliminarMovil(${idx})">BORRAR</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
     // =========================================================
-    // 5. SELECTOR DE HORA DESPLEGABLE CON CIERRE AUTOMÁTICO
+    // 5. SELECTOR DE HORA DESPLEGABLE CON GUARDADO EN BORRADOR
     // =========================================================
     const popupReloj = document.getElementById('popupReloj');
     const colHoras = document.getElementById('colHoras');
@@ -2249,6 +2749,7 @@
                 if (inputHoraActivo) {
                     inputHoraActivo.value = `${horaTemp}:${minTemp}`;
                     calcularHorasExcedentes();
+                    guardarBorradorEnVivo();
                 }
             });
         });
@@ -2262,6 +2763,7 @@
                 if (inputHoraActivo) {
                     inputHoraActivo.value = `${horaTemp}:${minTemp}`;
                     calcularHorasExcedentes();
+                    guardarBorradorEnVivo();
                 }
                 cerrarPopupHora();
             });
@@ -2349,7 +2851,7 @@
     }
 
     // =========================================================
-    // 7. FIRMA DIGITAL CON DEDO O MOUSE (BORRADO REAL)
+    // 7. FIRMA DIGITAL CON DEDO O MOUSE + AUTOGUARDADO EN BORRADOR
     // =========================================================
     const canvas = document.getElementById('canvasFirma');
     const ctx = canvas.getContext('2d');
@@ -2405,6 +2907,7 @@
         if (dibujando) {
             ctx.closePath();
             dibujando = false;
+            guardarBorradorEnVivo();
         }
     }
 
@@ -2422,10 +2925,11 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath();
         configurarEstiloPincel();
+        guardarBorradorEnVivo();
     }
 
     // =========================================================
-    // 8. CONSTRUCTOR DE PDF A4 (IMPRIME "CUIT / DNI:" Y SOLO NOMBRE DEL CLIENTE)
+    // 8. CONSTRUCTOR DE PDF A4
     // =========================================================
     async function construirDocumentoPDF(d) {
         const logoParaIncrustar = await obtenerLogoJpegParaPdf();
@@ -2746,7 +3250,7 @@
     }
 
     // =========================================================
-    // 9. GUARDADO INSTANTÁNEO (MODO TURBO) Y ENVÍO A GOOGLE DRIVE EN SEGUNDO PLANO
+    // 9. GUARDADO ANTI-DUPLICADOS, VALIDACIÓN Y MODO OFFLINE
     // =========================================================
     const NOMBRES_MESES = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -2759,72 +3263,120 @@
             d[el.getAttribute('data-campo')] = (el.value || '').trim().toUpperCase();
         });
 
-        d.firma = hayFirmaDibujada ? canvas.toDataURL('image/png') : '';
-        d.id = Date.now();
-        d.creadoPor = usuarioActivo ? usuarioActivo.username : 'ADMIN';
+        // Validación anti-planillas vacías o cierre accidental antes de finalizar el servicio
+        if (!d.nombreJjee) {
+            alert('⚠️ FALTA COMPLETAR EL NOMBRE O DNI DEL CUSTODIO (JJEE).');
+            document.getElementById('inputCuitJjee').focus();
+            return;
+        }
+        if (!d.horaFinalizacion || !hayFirmaDibujada) {
+            const faltantes = [];
+            if (!d.horaFinalizacion) faltantes.push('HORA DE FINALIZACIÓN');
+            if (!hayFirmaDibujada) faltantes.push('FIRMA DEL RESPONSABLE');
+            const conf = confirm(`⚠️ ATENCIÓN: Todavía falta completar: ${faltantes.join(' y ')}.\n\nRecordá que NO hace falta tocar "GUARDAR" para mantener el precargado (el borrador ya se guarda solo).\n\n¿Seguro que querés CERRAR Y ENVIAR esta Hoja de Ruta ahora?`);
+            if (!conf) return;
+        }
 
-        // 1. Guardar al instante en el historial local
-        let historial = [];
+        const btnGuardar = document.getElementById('btnGuardar');
+        btnGuardar.disabled = true;
+        btnGuardar.innerText = 'ASIGNANDO N° ÚNICO Y GUARDANDO...';
+
         try {
-            historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]'));
-            if (!Array.isArray(historial)) historial = [];
-        } catch (e) {
-            historial = [];
-        }
-        historial.unshift(d);
-        guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(historial));
-
-        // 2. Avanzar el número de Hoja de Ruta (+1) inmediatamente
-        avanzarContadorHojaDeRuta();
-
-        // 3. Limpiar casilleros para la siguiente hoja
-        document.querySelectorAll('[data-campo]').forEach(i => {
-            const c = i.getAttribute('data-campo');
-            if (c !== 'numHoja' && c !== 'cliente' && c !== 'fecha') {
-                i.value = '';
-                i.classList.remove('campo-auto');
+            // 1. Reserva atómica de número en la nube para que 2 celulares nunca repitan el mismo N°
+            const numEnPantalla = parseInt(d.numHoja || '0', 10) || 0;
+            const numAsignadoNube = await reservarNumeroUnicoEnNube(numEnPantalla);
+            if (numAsignadoNube) {
+                d.numHoja = numAsignadoNube;
+            } else {
+                avanzarContadorHojaDeRuta();
             }
-        });
-        document.getElementById('clientePredeterminado').value = 'EDESUR S.A';
-        document.getElementById('fechaServicio').value = new Date().toISOString().split('T')[0];
 
-        if (usuarioActivo && usuarioActivo.rol !== 'ADMIN') {
-            const inpNomJjee = document.getElementById('inputNombreJjee');
-            const inpCuitJjee = document.getElementById('inputCuitJjee');
-            if (inpNomJjee) inpNomJjee.value = (usuarioActivo.nombreCompleto || usuarioActivo.username).toUpperCase();
-            if (inpCuitJjee && usuarioActivo.cuitDni) inpCuitJjee.value = usuarioActivo.cuitDni.toUpperCase();
-        }
+            d.firma = hayFirmaDibujada ? canvas.toDataURL('image/png') : '';
+            d.id = Date.now();
+            d.creadoPor = usuarioActivo ? usuarioActivo.username : 'ADMIN';
+            d.fechaHoraCargaReal = new Date().toLocaleString('es-AR');
+            d.subidoADrive = false;
 
-        limpiarFirma();
-        mostrarHistorial();
-
-        const alerta = document.getElementById('mensajeExito');
-        alerta.innerText = `¡HOJA DE RUTA N° ${d.numHoja} GUARDADA AL INSTANTE Y SINCRONIZANDO CON GOOGLE DRIVE!`;
-        alerta.style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(() => { alerta.style.display = 'none'; }, 4000);
-
-        // 4. Envío en segundo plano a Google Drive sin trabar el celular
-        (async () => {
+            // 2. Guardar al instante en el historial local
+            let historial = [];
             try {
-                let anio = new Date().getFullYear();
-                let mesIndex = new Date().getMonth();
-                if (d.fecha && d.fecha.includes('-')) {
-                    const partes = d.fecha.split('-');
-                    if (partes.length === 3) {
-                        anio = parseInt(partes[0], 10) || anio;
-                        mesIndex = (parseInt(partes[1], 10) - 1);
-                    }
+                historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]'));
+                if (!Array.isArray(historial)) historial = [];
+            } catch (e) {
+                historial = [];
+            }
+            historial.unshift(d);
+            guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(historial));
+
+            // 3. Limpiar el borrador en vivo y preparar la planilla para el próximo servicio
+            borrarBorradorEnVivoActual();
+
+            document.querySelectorAll('[data-campo]').forEach(i => {
+                const c = i.getAttribute('data-campo');
+                if (c !== 'numHoja' && c !== 'cliente' && c !== 'fecha') {
+                    i.value = '';
+                    i.classList.remove('campo-auto');
                 }
-                const nombreCarpetaAnio = `Año ${anio}`;
-                const nombreCarpetaMes = NOMBRES_MESES[mesIndex] || 'Octubre';
-                await enviarACarpetasAutomaticasEnNube(d, obtenerUrlActivaNube(), nombreCarpetaAnio, nombreCarpetaMes);
-                await sincronizarEstadoCompletoConNube(true);
-            } catch (e) {}
-        })();
+            });
+            document.getElementById('clientePredeterminado').value = 'EDESUR S.A';
+            document.getElementById('fechaServicio').value = new Date().toISOString().split('T')[0];
+
+            if (usuarioActivo && usuarioActivo.rol !== 'ADMIN') {
+                const inpNomJjee = document.getElementById('inputNombreJjee');
+                const inpCuitJjee = document.getElementById('inputCuitJjee');
+                if (inpNomJjee) inpNomJjee.value = (usuarioActivo.nombreCompleto || usuarioActivo.username).toUpperCase();
+                if (inpCuitJjee && usuarioActivo.cuitDni) inpCuitJjee.value = usuarioActivo.cuitDni.toUpperCase();
+            }
+
+            limpiarFirma();
+            mostrarHistorial();
+
+            let anio = new Date().getFullYear();
+            let mesIndex = new Date().getMonth();
+            if (d.fecha && d.fecha.includes('-')) {
+                const partes = d.fecha.split('-');
+                if (partes.length === 3) {
+                    anio = parseInt(partes[0], 10) || anio;
+                    mesIndex = (parseInt(partes[1], 10) - 1);
+                }
+            }
+            const nombreCarpetaAnio = `Año ${anio}`;
+            const nombreCarpetaMes = NOMBRES_MESES[mesIndex] || 'Octubre';
+
+            const alerta = document.getElementById('mensajeExito');
+            if (navigator.onLine) {
+                alerta.style.backgroundColor = '#16a34a';
+                alerta.innerText = `¡HOJA DE RUTA N° ${d.numHoja} CERRADA CON N° ÚNICO Y ENVIÁNDOSE A GOOGLE DRIVE!`;
+            } else {
+                alerta.style.backgroundColor = '#d97706';
+                alerta.innerText = `🟠 SIN SEÑAL: HOJA N° ${d.numHoja} GUARDADA EN EL CELULAR. SE SUBIRÁ SOLA A DRIVE APENAS VUELVA INTERNET.`;
+            }
+            alerta.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => { alerta.style.display = 'none'; }, 4500);
+
+            // 4. Envío en segundo plano o guardado en Cola Offline si falla la señal
+            (async () => {
+                const enviadoOk = await enviarACarpetasAutomaticasEnNube(d, obtenerUrlActivaNube(), nombreCarpetaAnio, nombreCarpetaMes);
+                if (enviadoOk) {
+                    marcarHojaComoSubidaEnHistorialLocal(d.id);
+                    mostrarHistorial();
+                    await sincronizarEstadoCompletoConNube(true);
+                } else {
+                    const cola = obtenerColaOffline();
+                    cola.push({ datosHoja: d, nombreCarpetaAnio, nombreCarpetaMes });
+                    guardarColaOffline(cola);
+                    mostrarHistorial();
+                }
+            })();
+        } finally {
+            btnGuardar.disabled = false;
+            btnGuardar.innerText = 'GUARDAR HOJA DE RUTA';
+        }
     }
 
     async function enviarACarpetasAutomaticasEnNube(d, urlNube, nombreCarpetaAnio, nombreCarpetaMes) {
+        if (!navigator.onLine) return false;
         try {
             const doc = await construirDocumentoPDF(d);
             const dataUri = doc.output('datauristring');
@@ -2856,8 +3408,9 @@
                     body: cuerpoJson
                 });
             }
+            return true;
         } catch (err) {
-            console.error('Error al sincronizar con Google Drive:', err);
+            return false;
         }
     }
 
@@ -2875,23 +3428,141 @@
         guardarStorageSeguro('urlNubeGoogleDriveLince', url);
         await guardarUsuariosEnNube(obtenerListaUsuarios());
         await guardarClientesEnNube(obtenerListaClientes());
+        await guardarMovilesEnNube(obtenerListaMoviles());
         await sincronizarEstadoCompletoConNube(true);
         cerrarModalNube();
         alert('¡CONEXIÓN GUARDADA Y DATOS SINCRONIZADOS EN LA NUBE!');
     }
 
     // =========================================================
-    // 10. RESPALDO MANUAL A ONEDRIVE / PC (SOLO ADMIN)
+    // 10. EXPORTACIÓN A EXCEL (.CSV) PARA FACTURACIÓN Y RESPALDO (SOLO ADMIN)
     // =========================================================
+    function exportarHistorialAExcel() {
+        if (!usuarioActivo || usuarioActivo.rol !== 'ADMIN') {
+            alert('SOLO EL ADMINISTRADOR PUEDE EXPORTAR EL REPORTE A EXCEL.');
+            return;
+        }
+
+        const listaHoja = obtenerHistorialFiltradoActual();
+        if (listaHoja.length === 0) {
+            alert('NO HAY HOJAS DE RUTA EN LA VISTA ACTUAL PARA EXPORTAR.');
+            return;
+        }
+
+        const clientesMap = {};
+        obtenerListaClientes().forEach(c => {
+            clientesMap[String(c.nombre || '').toUpperCase()] = c.cuit || '';
+        });
+
+        const encabezados = [
+            'N° HOJA DE RUTA',
+            'FECHA SERVICIO',
+            'USUARIO CREADOR',
+            'FECHA Y HORA REAL DE CARGA',
+            'CLIENTE',
+            'CUIT CLIENTE (CONFIDENCIAL)',
+            'NOMBRE JJEE',
+            'CUIT / DNI JJEE',
+            'NOMBRE AUXILIAR',
+            'CUIT / DNI AUXILIAR',
+            'N° MÓVIL',
+            'PATENTE MÓVIL',
+            'HORA CITACIÓN',
+            'HORA FINALIZACIÓN',
+            'JJEE HORAS EXC.',
+            'AUX HORAS EXC.',
+            'KILÓMETROS',
+            'KM EXCEDENTES',
+            'REMITO N°',
+            'MÓDULO',
+            'PEAJES',
+            'EMPRESA/CHOFER 1',
+            'CONTENEDOR 1',
+            'CHASIS 1',
+            'SEMI 1',
+            'DIRECCIÓN SALIDA 1',
+            'LOCALIDAD SALIDA 1',
+            'HORA SALIDA 1',
+            'DIRECCIÓN LLEGADA 1',
+            'LOCALIDAD LLEGADA 1',
+            'HORA LLEGADA 1',
+            'RESPONSABLE FIRMA',
+            'DNI RESPONSABLE FIRMA',
+            'OBSERVACIONES'
+        ];
+
+        const escaparCeldaCsv = (valor) => {
+            const limpio = String(valor === undefined || valor === null ? '' : valor).replace(/\r?\n/g, ' ').replace(/"/g, '""');
+            return `"${limpio}"`;
+        };
+
+        const filasCsv = [encabezados.map(escaparCeldaCsv).join(';')];
+
+        listaHoja.forEach(item => {
+            const nomCli = String(item.cliente || 'EDESUR S.A').toUpperCase();
+            const cuitCli = clientesMap[nomCli] || '';
+            const fila = [
+                item.numHoja || '',
+                item.fecha || '',
+                item.creadoPor || '',
+                item.fechaHoraCargaReal || '',
+                nomCli,
+                cuitCli,
+                item.nombreJjee || '',
+                item.cuitJjee || '',
+                item.nombreAux || '',
+                item.cunAux || '',
+                item.numMovil || '',
+                item.patenteMovil || '',
+                item.horaCitacion || '',
+                item.horaFinalizacion || '',
+                item.jjeeHorasExc || '',
+                item.auxHorasExc || '',
+                item.kilometros || '',
+                item.kmExc || '',
+                item.remito || '',
+                item.modulo || '',
+                item.peajes || '',
+                item.chofer1 || '',
+                item.contenedor1 || '',
+                item.chasis1 || '',
+                item.semi1 || '',
+                item.dirSalida || '',
+                item.locSalida || '',
+                item.horaSalida || '',
+                item.dirLlegada || '',
+                item.locLlegada || '',
+                item.horaLlegada || '',
+                item.firmaApellidoNombre || '',
+                item.firmaDni || '',
+                item.observaciones || ''
+            ];
+            filasCsv.push(fila.map(escaparCeldaCsv).join(';'));
+        });
+
+        const contenidoCsv = '\uFEFF' + filasCsv.join('\r\n');
+        const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Facturacion_Hojas_de_Ruta_Lince_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+
     function respaldarEnOneDriveCorporativo() {
         const historial = leerStorageSeguro('hojasDeRutaLince', '[]');
         const usuarios = leerStorageSeguro('usuariosLince', '[]');
         const clientes = leerStorageSeguro('clientesLince', '[]');
+        const moviles = leerStorageSeguro('movilesLince', '[]');
         const paqueteRespaldo = {
             fechaRespaldo: new Date().toISOString(),
             hojasDeRuta: JSON.parse(historial),
             usuariosSistema: JSON.parse(usuarios),
-            clientesSistema: JSON.parse(clientes)
+            clientesSistema: JSON.parse(clientes),
+            movilesSistema: JSON.parse(moviles)
         };
 
         const blob = new Blob([JSON.stringify(paqueteRespaldo, null, 2)], { type: 'application/json' });
@@ -2906,7 +3577,7 @@
     }
 
     // =========================================================
-    // 11. MODAL DE HISTORIAL CON BUSCADOR INTELIGENTE Y RESTRICCIÓN DE BORRADO
+    // 11. MODAL DE HISTORIAL CON BUSCADOR E INMUTABILIDAD PARA CUSTODIOS
     // =========================================================
     async function abrirModalHistorial() {
         mostrarHistorial();
@@ -2924,9 +3595,7 @@
         mostrarHistorial();
     }
 
-    function mostrarHistorial() {
-        const tbody = document.getElementById('tablaHistorial');
-        const btnHistorial = document.getElementById('btnAbrirHistorial');
+    function obtenerHistorialFiltradoActual() {
         const inpBuscar = document.getElementById('inputBuscarHistorial');
         const terminoBusqueda = inpBuscar ? inpBuscar.value.trim().toUpperCase() : '';
 
@@ -2942,19 +3611,17 @@
         let historialVisible = [];
 
         if (esAdmin) {
-            const filtro = document.getElementById('selectFiltroUsuario').value;
+            const elFiltro = document.getElementById('selectFiltroUsuario');
+            const filtro = elFiltro ? elFiltro.value : 'TODOS';
             if (filtro && filtro !== 'TODOS') {
                 historialVisible = historialTotal.filter(item => (item.creadoPor || 'ADMIN') === filtro);
             } else {
                 historialVisible = historialTotal;
             }
-            btnHistorial.innerText = `📂 VER HISTORIAL COMPLETO (${historialTotal.length})`;
         } else if (usuarioActivo) {
             historialVisible = historialTotal.filter(item => item.creadoPor === usuarioActivo.username);
-            btnHistorial.innerText = `📂 MIS HOJAS DE RUTA (${historialVisible.length})`;
         }
 
-        // Filtro en vivo por DNI, CUIT, Nombre, Empresa, N° de Hoja, Móvil, Patente, Remito, Fecha, etc.
         if (terminoBusqueda !== '') {
             historialVisible = historialVisible.filter(item => {
                 const textoCompletoHoja = [
@@ -2990,16 +3657,52 @@
                 return textoCompletoHoja.includes(terminoBusqueda);
             });
         }
+        return historialVisible;
+    }
+
+    function mostrarHistorial() {
+        const tbody = document.getElementById('tablaHistorial');
+        const btnHistorial = document.getElementById('btnAbrirHistorial');
+        let historialTotal = [];
+        try {
+            historialTotal = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
+        } catch (e) {
+            historialTotal = [];
+        }
+
+        const esAdmin = usuarioActivo && usuarioActivo.rol === 'ADMIN';
+        const historialVisible = obtenerHistorialFiltradoActual();
+
+        if (esAdmin) {
+            btnHistorial.innerText = `📂 VER HISTORIAL COMPLETO (${historialTotal.length})`;
+        } else if (usuarioActivo) {
+            const misHojas = historialTotal.filter(item => item.creadoPor === usuarioActivo.username);
+            btnHistorial.innerText = `📂 MIS HOJAS DE RUTA (${misHojas.length})`;
+        }
 
         if (historialVisible.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">NO SE ENCONTRARON HOJAS DE RUTA CON ESE CRITERIO</td></tr>';
             return;
         }
 
-        tbody.innerHTML = historialVisible.map(item => `
+        const colaIds = obtenerColaOffline().map(x => String(x.datosHoja && x.datosHoja.id));
+
+        tbody.innerHTML = historialVisible.map(item => {
+            const estaPendiente = colaIds.includes(String(item.id)) || item.subidoADrive === false;
+            const badgeDrive = estaPendiente
+                ? `<span class="tag-estado-drive tag-drive-pendiente">⏳ PENDIENTE SEÑAL</span>`
+                : `<span class="tag-estado-drive tag-drive-ok">☁️ EN DRIVE</span>`;
+
+            return `
             <tr>
-                <td style="text-align:center; font-weight:bold;">${item.numHoja || '-'}</td>
-                <td style="text-align:center;">${item.fecha || '-'}</td>
+                <td style="text-align:center; font-weight:bold;">
+                    <div>${item.numHoja || '-'}</div>
+                    ${badgeDrive}
+                </td>
+                <td style="text-align:center;">
+                    <div>${item.fecha || '-'}</div>
+                    ${item.fechaHoraCargaReal ? `<div style="font-size:10px; color:#475569;">🕒 ${item.fechaHoraCargaReal}</div>` : ''}
+                </td>
                 <td style="text-align:center; font-weight:bold; color:#1e3a8a;">${item.creadoPor || 'ADMIN'}</td>
                 <td style="text-align:center; font-weight:bold;">${item.cliente || 'EDESUR S.A'}</td>
                 <td>
@@ -3010,13 +3713,14 @@
                 <td style="text-align:center; font-weight:bold;">${item.jjeeHorasExc || '00:00 HS'}</td>
                 <td style="text-align:center;">
                     <div class="contenedor-acciones">
-                        <button class="btn-accion-chico btn-cargar" onclick="cargarHojaGuardada(${item.id})">VER</button>
-                        <button class="btn-accion-chico btn-descargar-item" onclick="descargarHojaDesdeHistorial(${item.id})">DESCARGAR</button>
+                        ${esAdmin ? `<button class="btn-accion-chico btn-cargar" onclick="cargarHojaGuardada(${item.id})">VER / EDITAR</button>` : ''}
+                        <button class="btn-accion-chico btn-descargar-item" onclick="descargarHojaDesdeHistorial(${item.id})">PDF</button>
                         ${esAdmin ? `<button class="btn-accion-chico btn-eliminar" onclick="eliminarHojaGuardada(${item.id})">BORRAR</button>` : ''}
                     </div>
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
     }
 
     async function descargarHojaDesdeHistorial(id) {
@@ -3027,6 +3731,10 @@
     }
 
     function cargarHojaGuardada(id) {
+        if (!usuarioActivo || usuarioActivo.rol !== 'ADMIN') {
+            alert('LAS HOJAS CERRADAS NO PUEDEN MODIFICARSE POR CUSTODIOS. USÁ EL BOTÓN "PDF" PARA DESCARGARLA.');
+            return;
+        }
         const historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]'));
         const item = historial.find(h => h.id === id);
         if (!item) return;
@@ -3060,17 +3768,13 @@
         guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(historial));
         mostrarHistorial();
         try {
-            await fetch(obtenerUrlActivaNube(), {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ accion: 'eliminarHoja', id: id })
-            });
+            await enviarAccionPostNube({ accion: 'eliminarHoja', id: id });
         } catch (e) {}
     }
 
     function limpiarFormulario() {
-        if (confirm('¿SEGURO QUE QUERÉS LIMPIAR LOS CASILLEROS DE LA PLANILLA?')) {
+        if (confirm('¿SEGURO QUE QUERÉS LIMPIAR LOS CASILLEROS DE LA PLANILLA Y BORRAR EL PRECARGADO ACTUAL?')) {
+            borrarBorradorEnVivoActual();
             document.querySelectorAll('[data-campo]').forEach(i => {
                 const c = i.getAttribute('data-campo');
                 if (c !== 'numHoja' && c !== 'cliente' && c !== 'fecha') {
@@ -3110,23 +3814,41 @@
             inputFecha.value = new Date().toISOString().split('T')[0];
         }
 
-        document.querySelectorAll('input[type="text"]:not(.input-hora-custom):not(#inputUrlNube), textarea').forEach(campo => {
+        // Autoguardado de borrador en cada casillero que toque el custodio
+        document.querySelectorAll('[data-campo]').forEach(campo => {
             campo.addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
+                if (this.type === 'text' && !this.classList.contains('input-hora-custom')) {
+                    this.value = this.value.toUpperCase();
+                }
+                guardarBorradorEnVivo();
             });
+            campo.addEventListener('change', function() {
+                guardarBorradorEnVivo();
+            });
+        });
+
+        window.addEventListener('online', () => {
+            actualizarIndicadorConexionYCola();
+            procesarColaOffline();
+            sincronizarEstadoCompletoConNube(true);
+        });
+        window.addEventListener('offline', () => {
+            actualizarIndicadorConexionYCola();
         });
 
         inicializarContadorHojaDeRuta();
         inicializarSelectorDeHora();
-        inicializarAutocompletadoCustodios();
+        inicializarAutocompletadoCustodiosYMoviles();
         inicializarPredictivoClientes();
         actualizarDatalistsCustodios();
+        actualizarDatalistsMoviles();
         inicializarCanvas();
         obtenerLogoJpegParaPdf();
+        actualizarIndicadorConexionYCola();
         sincronizarUsuariosDesdeNube();
         sincronizarEstadoCompletoConNube(true);
 
-        // Sincronización automática rápida cada 6 segundos
+        // Sincronización automática cada 6 segundos
         setInterval(() => {
             sincronizarEstadoCompletoConNube(false);
         }, 6000);
