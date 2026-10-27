@@ -1656,7 +1656,8 @@
     }
 
     // =========================================================
-    // 0.B SISTEMA DE INSTALACIÓN DE APP EN EL MENÚ DEL CELULAR (PWA)
+    // =========================================================
+    // 0.B SISTEMA DE INSTALACIÓN DE APP Y MEMORIA OFFLINE (PWA + SERVICE WORKER)
     // =========================================================
     let eventoInstalacionPWA = null;
 
@@ -1666,6 +1667,11 @@
     }
 
     function inicializarPWAInstalable() {
+        // Registrar el motor offline (sw.js) para que nunca salga pantalla negra sin señal
+        if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+
         try {
             const iconoUrl = new URL('Sin título (1).jpg', window.location.href).href;
             const manifestObj = {
@@ -1673,6 +1679,7 @@
                 short_name: "Custodia Lince",
                 description: "Sistema Oficial de Hoja de Ruta - Lince Seguridad",
                 start_url: window.location.href.split('?')[0],
+                scope: "./",
                 display: "standalone",
                 background_color: "#143627",
                 theme_color: "#143627",
@@ -2223,7 +2230,8 @@
     }
 
     // =========================================================
-    // 1.D INICIO Y CIERRE DE SESIÓN + LANZADOR DE NOTIFICACIÓN APP
+    // =========================================================
+    // 1.D INICIO Y CIERRE DE SESIÓN (CON SOPORTE OFFLINE EN CELULAR)
     // =========================================================
     async function iniciarSesion() {
         const elUser = document.getElementById('loginUsuario');
@@ -2237,12 +2245,18 @@
         let usuarios = obtenerListaUsuarios();
         let encontrado = usuarios.find(u => String(u.username).toUpperCase() === userInp && String(u.clave).toUpperCase() === passInp);
 
-        if (!encontrado && userInp !== '') {
+        // Solo consulta la nube si hay internet; si está sin señal entra directo con la memoria del teléfono
+        if (!encontrado && userInp !== '' && navigator.onLine) {
             if (btnIngresar) {
                 btnIngresar.innerText = 'VERIFICANDO USUARIO...';
                 btnIngresar.disabled = true;
             }
-            await sincronizarUsuariosDesdeNube();
+            try {
+                await Promise.race([
+                    sincronizarUsuariosDesdeNube(),
+                    new Promise(res => setTimeout(res, 3500))
+                ]);
+            } catch (e) {}
             if (btnIngresar) {
                 btnIngresar.innerText = 'INGRESAR';
                 btnIngresar.disabled = false;
@@ -2256,7 +2270,12 @@
         }
 
         if (!encontrado) {
-            if (errorBox) errorBox.style.display = 'block';
+            if (errorBox) {
+                errorBox.innerText = navigator.onLine
+                    ? 'USUARIO O CLAVE INCORRECTOS'
+                    : 'MODO SIN SEÑAL: VERIFICÁ USUARIO Y CLAVE';
+                errorBox.style.display = 'block';
+            }
             return;
         }
 
@@ -2268,7 +2287,11 @@
         aplicarInterfazPorUsuario();
         restaurarBorradorEnVivo();
         mostrarNotificacionInstalarApp();
-        sincronizarEstadoCompletoConNube(true, true);
+        if (navigator.onLine) {
+            sincronizarEstadoCompletoConNube(true, true);
+        } else {
+            actualizarIndicadorConexionYCola();
+        }
     }
 
     function cerrarSesion() {
@@ -2565,6 +2588,19 @@
             const restantes = [];
             for (let i = 0; i < cola.length; i++) {
                 const itemCola = cola[i];
+                if (!itemCola || !itemCola.datosHoja) continue;
+
+                // Si se creó sin señal, al volver la red valida el número correlativo único en la nube antes de crear el PDF
+                if (!itemCola.numeroConfirmadoNube) {
+                    const numPropuesto = parseInt(itemCola.datosHoja.numHoja || '0', 10) || 0;
+                    const numOficial = await reservarNumeroUnicoEnNube(numPropuesto);
+                    if (numOficial) {
+                        itemCola.datosHoja.numHoja = numOficial;
+                        itemCola.numeroConfirmadoNube = true;
+                        actualizarNumeroHojaEnHistorialLocal(itemCola.datosHoja.id, numOficial);
+                    }
+                }
+
                 const exito = await enviarACarpetasAutomaticasEnNube(
                     itemCola.datosHoja,
                     obtenerUrlActivaNube(),
@@ -2579,9 +2615,27 @@
             }
             guardarColaOffline(restantes);
             mostrarHistorial();
+
+            const alerta = document.getElementById('mensajeExito');
+            if (alerta && restantes.length === 0) {
+                alerta.style.backgroundColor = '#16a34a';
+                alerta.innerText = '☁️ ¡SEÑAL RECUPERADA! TODAS LAS HOJAS GUARDADAS OFFLINE SE SUBIERON A GOOGLE DRIVE.';
+                alerta.style.display = 'block';
+                setTimeout(() => { alerta.style.display = 'none'; }, 5000);
+            }
         } finally {
             procesandoColaOffline = false;
         }
+    }
+
+    function actualizarNumeroHojaEnHistorialLocal(idHoja, nuevoNumHoja) {
+        try {
+            let hist = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
+            hist.forEach(h => {
+                if (String(h.id) === String(idHoja)) h.numHoja = nuevoNumHoja;
+            });
+            guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(hist));
+        } catch (e) {}
     }
 
     function marcarHojaComoSubidaEnHistorialLocal(idHoja) {
