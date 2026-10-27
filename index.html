@@ -1046,25 +1046,30 @@
         </tbody>
     </table>
 
-    <!-- SECCIÓN 1: DATOS DE LA CUSTODIA -->
+    <!-- SECCIÓN 1: DATOS DE LA CUSTODIA (CON AUXILIAR 1 Y AUXILIAR 2) -->
     <div class="seccion-titulo">DATOS DE LA CUSTODIA</div>
     <table class="tabla-responsive">
         <thead>
             <tr>
-                <th style="width: 35%;">JJEE</th>
-                <th style="width: 35%;">AUXILIAR</th>
-                <th style="width: 30%;">MÓVIL</th>
+                <th style="width: 26%;">JJEE</th>
+                <th style="width: 26%;">AUXILIAR 1</th>
+                <th style="width: 26%;">AUXILIAR 2</th>
+                <th style="width: 22%;">MÓVIL</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>
                     <span class="etiqueta-celda">NOMBRE (JJEE):</span>
-                    <input type="text" id="inputNombreJjee" data-campo="nombreJjee" list="listaNombresCustodios" placeholder="SE COMPLETA CON EL DNI O ESCRIBIR">
+                    <input type="text" id="inputNombreJjee" data-campo="nombreJjee" list="listaNombresCustodios" placeholder="SE COMPLETA CON DNI O ESCRIBIR">
                 </td>
                 <td>
-                    <span class="etiqueta-celda">NOMBRE (AUXILIAR):</span>
-                    <input type="text" id="inputNombreAux" data-campo="nombreAux" list="listaNombresCustodios" placeholder="SE COMPLETA CON EL DNI O ESCRIBIR">
+                    <span class="etiqueta-celda">NOMBRE (AUXILIAR 1):</span>
+                    <input type="text" id="inputNombreAux" data-campo="nombreAux" list="listaNombresCustodios" placeholder="SE COMPLETA CON DNI O ESCRIBIR">
+                </td>
+                <td>
+                    <span class="etiqueta-celda">NOMBRE (AUXILIAR 2):</span>
+                    <input type="text" id="inputNombreAux2" data-campo="nombreAux2" list="listaNombresCustodios" placeholder="OPCIONAL - CON DNI O ESCRIBIR">
                 </td>
                 <td>
                     <span class="etiqueta-celda">NÚMERO DE MÓVIL:</span>
@@ -1073,12 +1078,16 @@
             </tr>
             <tr>
                 <td>
-                    <span class="etiqueta-celda">CUIT / DNI:</span>
-                    <input type="text" id="inputCuitJjee" data-campo="cuitJjee" list="listaDniCustodios" placeholder="INGRESE DNI O CUIT DE JJEE">
+                    <span class="etiqueta-celda">CUIT / DNI (JJEE):</span>
+                    <input type="text" id="inputCuitJjee" data-campo="cuitJjee" list="listaDniCustodios" placeholder="DNI O CUIT DE JJEE">
                 </td>
                 <td>
-                    <span class="etiqueta-celda">CUIT / DNI:</span>
-                    <input type="text" id="inputCuitAux" data-campo="cunAux" list="listaDniCustodios" placeholder="INGRESE DNI O CUIT DE AUXILIAR">
+                    <span class="etiqueta-celda">CUIT / DNI (AUX 1):</span>
+                    <input type="text" id="inputCuitAux" data-campo="cunAux" list="listaDniCustodios" placeholder="DNI O CUIT DE AUX 1">
+                </td>
+                <td>
+                    <span class="etiqueta-celda">CUIT / DNI (AUX 2):</span>
+                    <input type="text" id="inputCuitAux2" data-campo="cunAux2" list="listaDniCustodios" placeholder="DNI O CUIT DE AUX 2">
                 </td>
                 <td>
                     <span class="etiqueta-celda">PATENTE:</span>
@@ -1088,26 +1097,30 @@
         </tbody>
     </table>
 
-    <!-- SECCIÓN 2: HORAS Y KM EXCEDENTES / PEAJES -->
+    <!-- SECCIÓN 2: HORAS Y KM EXCEDENTES / PEAJES (CON AUX 2 HORAS EXC.) -->
     <div class="seccion-titulo">HORAS Y KM. EXCEDENTES / PEAJES</div>
     <table class="tabla-responsive">
         <tbody>
             <tr>
-                <td style="width: 25%;">
+                <td style="width: 18%;">
                     <span class="etiqueta-celda">JJEE HORAS EXC.:</span>
                     <input type="text" id="jjeeHorasExc" data-campo="jjeeHorasExc" placeholder="AUTO">
                 </td>
-                <td style="width: 25%;">
-                    <span class="etiqueta-celda">AUX HORAS EXC.:</span>
+                <td style="width: 18%;">
+                    <span class="etiqueta-celda">AUX 1 HORAS EXC.:</span>
                     <input type="text" id="auxHorasExc" data-campo="auxHorasExc" placeholder="AUTO">
                 </td>
-                <td rowspan="2" style="width: 50%; vertical-align: top;">
+                <td style="width: 18%;">
+                    <span class="etiqueta-celda">AUX 2 HORAS EXC.:</span>
+                    <input type="text" id="aux2HorasExc" data-campo="aux2HorasExc" placeholder="AUTO">
+                </td>
+                <td rowspan="2" style="width: 46%; vertical-align: top;">
                     <span class="etiqueta-celda">DETALLE DE PEAJES:</span>
                     <textarea rows="3" data-campo="peajes"></textarea>
                 </td>
             </tr>
             <tr>
-                <td colspan="2">
+                <td colspan="3">
                     <span class="etiqueta-celda">KM EXC.:</span>
                     <input type="number" data-campo="kmExc">
                 </td>
@@ -4657,12 +4670,12 @@
 </div>
 
 <!-- =========================================================
-     12. MODAL DE RADAR GPS EN VIVO + DESPACHO DE SERVICIOS
+     12. MODAL DE RADAR GPS EN VIVO + PRECARGA DE HOJA DE RUTA POR CUENTA DE USUARIO
      ========================================================= -->
 <div id="modalRadarDespacho" class="modal-fondo">
     <div class="modal-contenido" style="max-width: 960px;">
         <div class="modal-cabecera">
-            <h3>📍 RADAR GPS EN TIEMPO REAL Y DESPACHO DE SERVICIOS</h3>
+            <h3>📍 RADAR GPS EN TIEMPO REAL Y PRECARGA DE SERVICIOS</h3>
             <button type="button" class="btn-cerrar-modal" onclick="cerrarModalRadarDespacho()">✖ CERRAR</button>
         </div>
 
@@ -4680,58 +4693,64 @@
             <tbody id="tablaRadarGpsVivo"></tbody>
         </table>
 
-        <div class="seccion-titulo">📋 DESPACHAR / PRECARGAR ORDEN DE SERVICIO A UN CUSTODIO</div>
+        <div class="seccion-titulo">📋 PRECARGAR HOJA DE RUTA EN LA CUENTA DE LOS CUSTODIOS (SIN USAR N° DE TELÉFONO)</div>
+        <p style="font-size: 12px; color: #1e293b; background: #eff6ff; padding: 8px 10px; border-left: 4px solid #2563eb; margin: 4px 0 8px 0;">
+            ℹ️ <b>¿Cómo le llega al custodio?</b> Al tocar <b>"PRECARGAR EN CUENTA DEL CUSTODIO"</b>, la orden se vincula por sistema al usuario elegido (tanto al <b>JJEE</b> como al <b>Auxiliar 1</b> y <b>Auxiliar 2</b>). Apenas cualquiera de ellos abra la app con su usuario y clave, verá estos datos ya escritos en su planilla.
+        </p>
         <table class="tabla-responsive" style="margin-bottom: 12px;">
             <tbody>
                 <tr>
                     <td style="width: 25%;">
-                        <span class="etiqueta-celda">ASIGNAR A CUSTODIO (JJEE):</span>
+                        <span class="etiqueta-celda">CUSTODIO TITULAR (JJEE):</span>
                         <select id="despCustodioJjee"></select>
                     </td>
                     <td style="width: 25%;">
-                        <span class="etiqueta-celda">CUSTODIO AUXILIAR (OPCIONAL):</span>
+                        <span class="etiqueta-celda">CUSTODIO AUXILIAR 1 (OPCIONAL):</span>
                         <select id="despCustodioAux"></select>
+                    </td>
+                    <td style="width: 25%;">
+                        <span class="etiqueta-celda">CUSTODIO AUXILIAR 2 (OPCIONAL):</span>
+                        <select id="despCustodioAux2"></select>
                     </td>
                     <td style="width: 25%;">
                         <span class="etiqueta-celda">CLIENTE / EMPRESA:</span>
                         <select id="despCliente"></select>
                     </td>
-                    <td style="width: 25%;">
-                        <span class="etiqueta-celda">FECHA DEL SERVICIO:</span>
-                        <input type="date" id="despFecha">
-                    </td>
                 </tr>
                 <tr>
                     <td>
+                        <span class="etiqueta-celda">FECHA DEL SERVICIO:</span>
+                        <input type="date" id="despFecha">
+                    </td>
+                    <td>
                         <span class="etiqueta-celda">HORA DE CITACIÓN:</span>
-                        <input type="text" id="despHoraCitacion" placeholder="EJ: 07:00">
+                        <input type="text" id="despHoraCitacion" placeholder="EJ: 07:30">
                     </td>
                     <td>
-                        <span class="etiqueta-celda">MÓVIL ASIGNADO:</span>
-                        <input type="text" id="despMovil" list="listaNumerosMoviles" placeholder="N° MÓVIL">
-                    </td>
-                    <td>
-                        <span class="etiqueta-celda">MÓDULO / REFERENCIA:</span>
-                        <input type="text" id="despModulo" placeholder="EJ: MÓDULO MÍN. 4 HS">
+                        <span class="etiqueta-celda">MÓVIL Y MÓDULO:</span>
+                        <div style="display: flex; gap: 4px;">
+                            <input type="text" id="despMovil" list="listaNumerosMoviles" placeholder="MÓVIL" style="width: 45%;">
+                            <input type="text" id="despModulo" placeholder="MÓDULO" style="width: 55%;">
+                        </div>
                     </td>
                     <td style="text-align: center;">
                         <button type="button" class="btn-accion-chico btn-descargar-item" style="width: 100%; padding: 10px;" onclick="crearDespachoServicio()">
-                            📲 ENVIAR ORDEN AL CELULAR
+                            📥 PRECARGAR EN CUENTA DEL CUSTODIO
                         </button>
                     </td>
                 </tr>
             </tbody>
         </table>
 
-        <div class="seccion-titulo">ÓRDENES DE SERVICIO PENDIENTES ENVIADAS A CUSTODIOS</div>
+        <div class="seccion-titulo">ÓRDENES PRECARGADAS ACTIVAS (PENDIENTES DE FINALIZAR)</div>
         <table class="tabla-responsive">
             <thead>
                 <tr>
                     <th style="width: 14%;">FECHA / HORA</th>
-                    <th style="width: 24%;">CUSTODIO JJEE / AUX</th>
-                    <th style="width: 22%;">CLIENTE</th>
-                    <th style="width: 20%;">MÓVIL / MÓDULO</th>
-                    <th style="width: 20%;">ACCIÓN</th>
+                    <th style="width: 30%;">CUSTODIOS (JJEE / AUX 1 / AUX 2)</th>
+                    <th style="width: 18%;">CLIENTE</th>
+                    <th style="width: 16%;">MÓVIL / MÓDULO</th>
+                    <th style="width: 22%;">ACCIÓN</th>
                 </tr>
             </thead>
             <tbody id="tablaDespachosPendientes"></tbody>
@@ -4741,9 +4760,9 @@
 
 <script id="superMejorasCorporativasLince">
     // =========================================================
-    // A. INYECCIÓN AUTOMÁTICA DE CONTROLES VISUALES EN LA PLANILLA Y MODALES
+    // A. INYECCIÓN AUTOMÁTICA DE CONTROLES VISUALES Y AUTOCOMPLETADO AUXILIAR 2
     // =========================================================
-    let fotosComprobantesActuales = []; // [{ tipo: 'REMITO'|'PEAJE', dataUrl: '...' }]
+    let fotosComprobantesActuales = [];
     let gpsInicioActual = null;
     let gpsVivoActual = null;
     let watchIdGpsLince = null;
@@ -4753,8 +4772,13 @@
     let ubicacionesVivoNube = {};
     let despachosNube = [];
 
+    try {
+        despachosNube = JSON.parse(leerStorageSeguro('despachosLince', '[]')) || [];
+        if (!Array.isArray(despachosNube)) despachosNube = [];
+    } catch (e) { despachosNube = []; }
+
     function inyectarControlesNuevosEnDOM() {
-        // 1. Inyectar selector de Clientes Permitidos y Checkbox de Cambio de Clave adentro de #modalUsuarios
+        // 1. Selector de Clientes Permitidos y Checkbox de Cambio de Clave en #modalUsuarios
         const selectRol = document.getElementById('nuevoUserRol');
         if (selectRol && !document.getElementById('contenedorPermisosColaborador')) {
             const filaPermisos = document.createElement('tr');
@@ -4777,10 +4801,10 @@
             if (tbodyModalUser) {
                 tbodyModalUser.insertBefore(filaPermisos, tbodyModalUser.lastElementChild);
             }
-            selectRol.addEventListener('change', actualizarVisibilidadChecksColaborador);
+            selectRol.addEventListener('change', () => actualizarVisibilidadChecksColaborador(['TODOS']));
         }
 
-        // 2. Inyectar Botones de Cámara para Fotos de Comprobantes (Remito y Peajes)
+        // 2. Botón de Cámara para Fotos de Comprobantes (Remito y Peajes)
         const campoPeajes = document.querySelector('[data-campo="peajes"]');
         if (campoPeajes && !document.getElementById('bloqueFotosComprobantes')) {
             const divFotos = document.createElement('div');
@@ -4799,7 +4823,7 @@
             campoPeajes.parentNode.appendChild(divFotos);
         }
 
-        // 3. Inyectar Barra de Tarifas de Pre-Liquidación en #modalEstadisticas (Solo visible para ADMIN)
+        // 3. Barra de Tarifas de Pre-Liquidación en #modalEstadisticas (Solo visible para ADMIN)
         const modalStats = document.getElementById('modalEstadisticas');
         const gridKpi = modalStats ? modalStats.querySelector('.grid-tarjetas-control') : null;
         if (gridKpi && !document.getElementById('barraTarifasAdmin')) {
@@ -4830,10 +4854,49 @@
             `;
             gridKpi.parentNode.insertBefore(divTarifas, gridKpi);
         }
+
+        // 4. Conectar autocompletado por DNI / CUIT y Nombre para AUXILIAR 2
+        const inpCuitAux2 = document.getElementById('inputCuitAux2');
+        const inpNomAux2 = document.getElementById('inputNombreAux2');
+        if (inpCuitAux2 && inpNomAux2 && !inpCuitAux2.dataset.listenerActivo) {
+            inpCuitAux2.dataset.listenerActivo = 'true';
+            inpCuitAux2.addEventListener('input', () => {
+                this.value = (inpCuitAux2.value || '').toUpperCase();
+                const cust = buscarCustodioPorDniOCuit(inpCuitAux2.value);
+                if (cust) {
+                    inpNomAux2.value = (cust.nombreCompleto || cust.username).toUpperCase();
+                    inpNomAux2.classList.add('campo-auto');
+                    calcularHorasExcedentes();
+                    guardarBorradorEnVivo();
+                }
+            });
+            inpCuitAux2.addEventListener('change', () => {
+                const cust = buscarCustodioPorDniOCuit(inpCuitAux2.value);
+                if (cust) {
+                    inpNomAux2.value = (cust.nombreCompleto || cust.username).toUpperCase();
+                    if (cust.cuitDni) inpCuitAux2.value = cust.cuitDni.toUpperCase();
+                    inpNomAux2.classList.add('campo-auto');
+                    calcularHorasExcedentes();
+                    guardarBorradorEnVivo();
+                }
+            });
+            inpNomAux2.addEventListener('change', () => {
+                const cust = buscarCustodioPorNombre(inpNomAux2.value);
+                if (cust) {
+                    inpNomAux2.value = (cust.nombreCompleto || cust.username).toUpperCase();
+                    if (cust.cuitDni) {
+                        inpCuitAux2.value = cust.cuitDni.toUpperCase();
+                        inpCuitAux2.classList.add('campo-auto');
+                    }
+                    calcularHorasExcedentes();
+                    guardarBorradorEnVivo();
+                }
+            });
+        }
     }
 
     // =========================================================
-    // B. REGLA DEL MÓDULO MÍNIMO DE 4 HORAS + BLOQUEO PARA CUSTODIOS (SOLO ADMIN EDITA)
+    // B. REGLA DEL MÓDULO MÍNIMO DE 4 HORAS (JJEE, AUX 1 Y AUX 2)
     // =========================================================
     calcularHorasExcedentes = function() {
         const valInicio = document.getElementById('horaCitacion').value;
@@ -4852,8 +4915,7 @@
         }
 
         let minutosTrabajados = minutosFin - minutosInicio;
-        // REGLA OFICIAL LINCE: El módulo mínimo de arranque es siempre de 4 horas (240 minutos).
-        // Si trabajó entre 1 minuto y 3:59 hs, se computan 04:00 HS. De 4 hs en adelante va la hora real.
+        // Mínimo obligatorio de 4 horas (240 min); de 4 hs en adelante va la hora real
         let minutosComputados = minutosTrabajados < 240 ? 240 : minutosTrabajados;
 
         const horas = Math.floor(minutosComputados / 60);
@@ -4861,23 +4923,31 @@
         const textoResultado = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')} HS`;
 
         const inpJ = document.getElementById('jjeeHorasExc');
-        const inpA = document.getElementById('auxHorasExc');
+        const inpA1 = document.getElementById('auxHorasExc');
+        const inpA2 = document.getElementById('aux2HorasExc');
+
         if (inpJ) {
             inpJ.value = textoResultado;
             inpJ.classList.add('campo-auto');
         }
-        if (inpA) {
-            inpA.value = textoResultado;
-            inpA.classList.add('campo-auto');
+        if (inpA1) {
+            inpA1.value = textoResultado;
+            inpA1.classList.add('campo-auto');
+        }
+        if (inpA2) {
+            inpA2.value = textoResultado;
+            inpA2.classList.add('campo-auto');
         }
     };
 
     function aplicarBloqueoEdicionHorasExcedentes() {
         const inpJ = document.getElementById('jjeeHorasExc');
-        const inpA = document.getElementById('auxHorasExc');
+        const inpA1 = document.getElementById('auxHorasExc');
+        const inpA2 = document.getElementById('aux2HorasExc');
         const puedeEditar = esRolAdmin();
         if (inpJ) inpJ.readOnly = !puedeEditar;
-        if (inpA) inpA.readOnly = !puedeEditar;
+        if (inpA1) inpA1.readOnly = !puedeEditar;
+        if (inpA2) inpA2.readOnly = !puedeEditar;
     }
 
     // =========================================================
@@ -4891,12 +4961,10 @@
     function iniciarRastreoGpsContinuo() {
         if (!('geolocation' in navigator)) return;
 
-        // 1. Capturar posición inicial inmediata
         navigator.geolocation.getCurrentPosition((pos) => {
             registrarCoordenadaRecibida(pos);
         }, () => {}, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
 
-        // 2. Dejar encendido el rastreador continuo en todo momento
         if (watchIdGpsLince !== null) {
             navigator.geolocation.clearWatch(watchIdGpsLince);
         }
@@ -4916,7 +4984,6 @@
         };
         gpsVivoActual = punto;
 
-        // Si la planilla actual todavía no tenía GPS de Inicio, lo sella automáticamente
         const guardadoPrevio = leerStorageSeguro('gpsInicioBorradorLince', '');
         if (!guardadoPrevio) {
             gpsInicioActual = punto;
@@ -4925,7 +4992,6 @@
             try { gpsInicioActual = JSON.parse(guardadoPrevio); } catch (e) { gpsInicioActual = punto; }
         }
 
-        // Reportar a la nube para que el ADMIN vea dónde está en el Radar GPS en Vivo
         const ahoraMs = Date.now();
         if (usuarioActivo && navigator.onLine && (ahoraMs - ultimoEnvioGpsNubeMs > 20000)) {
             ultimoEnvioGpsNubeMs = ahoraMs;
@@ -4948,14 +5014,13 @@
     }
 
     // =========================================================
-    // D. CAMBIO DE CLAVE PERSONAL OBLIGATORIO POR ÚNICA VEZ (VISIBLE PARA ADMIN)
+    // D. CAMBIO DE CLAVE PERSONAL OBLIGATORIO POR ÚNICA VEZ
     // =========================================================
     function verificarSiRequiereCambioClave() {
         if (!usuarioActivo || esRolAdmin()) {
             document.getElementById('modalCambioClaveObligatorio').style.display = 'none';
             return;
         }
-        // Si requiereCambioClave es true (o si nunca la cambió todavía), abre el modal obligatorio
         if (usuarioActivo.requiereCambioClave !== false) {
             document.getElementById('lblNombreCambioClave').innerText = usuarioActivo.nombreCompleto || usuarioActivo.username;
             document.getElementById('inputNuevaClavePersonal1').value = '';
@@ -4989,7 +5054,6 @@
         btn.innerText = 'ACTUALIZANDO CLAVE EN SISTEMA...';
 
         try {
-            // 1. Actualizar en el padrón local para que el Admin vea la clave nueva en su tabla
             const usuarios = obtenerListaUsuarios();
             usuarios.forEach(u => {
                 if (String(u.username).toUpperCase() === String(usuarioActivo.username).toUpperCase()) {
@@ -5003,7 +5067,6 @@
             usuarioActivo.requiereCambioClave = false;
             guardarSesionSegura('sesionActivaLince', JSON.stringify(usuarioActivo));
 
-            // 2. Actualizar en la nube para que el Administrador tenga siempre la clave nueva disponible
             if (navigator.onLine) {
                 await enviarAccionPostNube({
                     accion: 'cambiarClavePersonal',
@@ -5068,7 +5131,6 @@
         return permitidos.map(x => String(x).trim().toUpperCase()).includes(cliLimpio);
     }
 
-    // Sobrescribir gestión de usuarios para incluir Clientes Permitidos y Cambio de Clave
     fusionarUsuariosLocalYNube = function(listaNube, listaLocal) {
         const mapa = new Map();
         (listaLocal || []).forEach(u => {
@@ -5248,7 +5310,7 @@
     };
 
     // =========================================================
-    // F. FOTOS DE PEAJES Y REMITOS EN 2DA HOJA DEL PDF
+    // F. FOTOS DE PEAJES Y REMITOS + PDF A4 CON AUXILIAR 2 Y AUX 2 HORAS EXC.
     // =========================================================
     function agregarFotoComprobante(inputEl) {
         if (!inputEl.files || !inputEl.files[0]) return;
@@ -5303,10 +5365,306 @@
         `).join('');
     }
 
-    // Extender construirDocumentoPDF para agregar la Hoja 2 con las fotos adjuntas
-    const _construirDocumentoPDFOrig = construirDocumentoPDF;
+    // Constructor de PDF A4 actualizado con AUXILIAR 2 y AUX 2 HORAS EXC. + Hoja 2 de Fotos
     construirDocumentoPDF = async function(d) {
-        const doc = await _construirDocumentoPDFOrig(d);
+        const logoParaIncrustar = await obtenerLogoJpegParaPdf();
+
+        let fechaImpresa = d.fecha || '';
+        if (fechaImpresa.includes('-')) {
+            const p = fechaImpresa.split('-');
+            if (p.length === 3) fechaImpresa = `${p[2]}/${p[1]}/${p[0]}`;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        function dibujarBarraSeccion(y, titulo) {
+            doc.setFillColor(20, 54, 39);
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.3);
+            doc.rect(13, y, 184, 6, 'FD');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.setTextColor(255, 255, 255);
+            doc.text(titulo, 105, y + 4.3, { align: 'center' });
+        }
+
+        function dibujarEncabezadoTabla(x, y, w, h, texto) {
+            doc.setFillColor(203, 213, 225);
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.3);
+            doc.rect(x, y, w, h, 'FD');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8.2);
+            doc.setTextColor(0, 0, 0);
+            doc.text(texto, x + w / 2, y + 4, { align: 'center' });
+        }
+
+        function dibujarCeldaConInput(x, y, w, h, etiqueta, valor, esFilaPar = false, esVerdeAuto = false) {
+            if (esFilaPar) doc.setFillColor(241, 245, 249);
+            else doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.3);
+            doc.rect(x, y, w, h, 'FD');
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6.5);
+            doc.setTextColor(30, 41, 59);
+            doc.text(etiqueta, x + 1.5, y + 3.4);
+
+            const boxX = x + 1.5;
+            const boxY = y + 4.5;
+            const boxW = w - 3.0;
+            const boxH = h - 5.8;
+
+            if (esVerdeAuto && valor) {
+                doc.setFillColor(240, 253, 244);
+                doc.setDrawColor(22, 163, 74);
+            } else {
+                doc.setFillColor(255, 255, 255);
+                doc.setDrawColor(148, 163, 184);
+            }
+            doc.setLineWidth(0.25);
+            doc.roundedRect(boxX, boxY, boxW, boxH, 0.8, 0.8, 'FD');
+
+            if (valor) {
+                const textoStr = String(valor);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(0, 0, 0);
+
+                if (boxH > 10) {
+                    doc.setFontSize(8.2);
+                    const lineas = doc.splitTextToSize(textoStr, boxW - 3);
+                    doc.text(lineas, boxX + 1.5, boxY + 4);
+                } else {
+                    let tamFuente = 8.5;
+                    doc.setFontSize(tamFuente);
+                    while (tamFuente > 5.5 && doc.getTextWidth(textoStr) > (boxW - 2.5)) {
+                        tamFuente -= 0.5;
+                        doc.setFontSize(tamFuente);
+                    }
+                    const lineas = doc.splitTextToSize(textoStr, boxW - 2);
+                    if (lineas.length === 1) {
+                        doc.text(lineas[0], boxX + 1.2, boxY + (boxH / 2) + 1.1);
+                    } else {
+                        doc.setFontSize(5.8);
+                        doc.text(lineas.slice(0, 2), boxX + 1.2, boxY + 2.6);
+                    }
+                }
+            }
+        }
+
+        function dibujarCeldaPatenteDoble(x, y, w, h, valChasis, valSemi, esFilaPar = false) {
+            if (esFilaPar) doc.setFillColor(241, 245, 249);
+            else doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.3);
+            doc.rect(x, y, w, h, 'FD');
+
+            const mitadW = (w - 5.4) / 2;
+            const boxY = y + 4.5;
+            const boxH = h - 5.8;
+
+            const x1 = x + 1.8;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6.8);
+            doc.setTextColor(30, 41, 59);
+            doc.text('CHASIS/TRACTOR:', x1, y + 3.4);
+
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(148, 163, 184);
+            doc.setLineWidth(0.25);
+            doc.roundedRect(x1, boxY, mitadW, boxH, 0.8, 0.8, 'FD');
+            if (valChasis) {
+                doc.setFontSize(8.2);
+                doc.setTextColor(0, 0, 0);
+                doc.text(String(valChasis).substring(0, 18), x1 + 1.8, boxY + (boxH / 2) + 1.1);
+            }
+
+            const x2 = x1 + mitadW + 1.8;
+            doc.setFontSize(6.8);
+            doc.setTextColor(30, 41, 59);
+            doc.text('SEMI:', x2, y + 3.4);
+
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(148, 163, 184);
+            doc.roundedRect(x2, boxY, mitadW, boxH, 0.8, 0.8, 'FD');
+            if (valSemi) {
+                doc.setFontSize(8.2);
+                doc.setTextColor(0, 0, 0);
+                doc.text(String(valSemi).substring(0, 18), x2 + 1.8, boxY + (boxH / 2) + 1.1);
+            }
+        }
+
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.6);
+        doc.rect(8, 8, 194, 281);
+
+        if (logoParaIncrustar) {
+            doc.addImage(logoParaIncrustar, 'JPEG', 13, 10, 52, 23);
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(20, 54, 39);
+        doc.text('SERVICIO DE CUSTODIA', 13, 37);
+
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(120, 14, 77, 15, 'FD');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10.5);
+        doc.setTextColor(0, 0, 0);
+        doc.text('HOJA DE RUTA N°', 123, 23);
+
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(148, 163, 184);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(160, 17, 34, 9, 0.8, 0.8, 'FD');
+        doc.setFontSize(11);
+        doc.text(d.numHoja || '00000000', 177, 23, { align: 'center' });
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.7);
+        doc.line(13, 39.2, 197, 39.2);
+
+        let y = 41;
+        dibujarCeldaConInput(13, y, 46, 13, 'FECHA:', fechaImpresa, false);
+        dibujarCeldaConInput(59, y, 92, 13, 'CLIENTE:', d.cliente || 'EDESUR S.A', false);
+        dibujarCeldaConInput(151, y, 46, 13, 'KILÓMETROS:', d.kilometros, false);
+
+        y += 13;
+        dibujarCeldaConInput(13, y, 46, 13, 'HORA DE CITACIÓN:', d.horaCitacion, true);
+        dibujarCeldaConInput(59, y, 46, 13, 'HORA DE FINALIZACIÓN:', d.horaFinalizacion, true);
+        dibujarCeldaConInput(105, y, 46, 13, 'REMITO N°:', d.remito, true);
+        dibujarCeldaConInput(151, y, 46, 13, 'MÓDULO:', d.modulo, true);
+
+        // SECCIÓN 1 EN PDF: 4 COLUMNAS (JJEE, AUXILIAR 1, AUXILIAR 2, MÓVIL)
+        y += 15;
+        dibujarBarraSeccion(y, 'DATOS DE LA CUSTODIA');
+        y += 6;
+        dibujarEncabezadoTabla(13, y, 48, 5.5, 'JJEE');
+        dibujarEncabezadoTabla(61, y, 48, 5.5, 'AUXILIAR 1');
+        dibujarEncabezadoTabla(109, y, 48, 5.5, 'AUXILIAR 2');
+        dibujarEncabezadoTabla(157, y, 40, 5.5, 'MÓVIL');
+
+        y += 5.5;
+        dibujarCeldaConInput(13, y, 48, 13, 'NOMBRE (JJEE):', d.nombreJjee, false);
+        dibujarCeldaConInput(61, y, 48, 13, 'NOMBRE (AUX 1):', d.nombreAux, false);
+        dibujarCeldaConInput(109, y, 48, 13, 'NOMBRE (AUX 2):', d.nombreAux2, false);
+        dibujarCeldaConInput(157, y, 40, 13, 'N° DE MÓVIL:', d.numMovil, false);
+
+        y += 13;
+        dibujarCeldaConInput(13, y, 48, 13, 'CUIT / DNI:', d.cuitJjee, true);
+        dibujarCeldaConInput(61, y, 48, 13, 'CUIT / DNI:', d.cunAux, true);
+        dibujarCeldaConInput(109, y, 48, 13, 'CUIT / DNI:', d.cunAux2, true);
+        dibujarCeldaConInput(157, y, 40, 13, 'PATENTE:', d.patenteMovil, true);
+
+        // SECCIÓN 2 EN PDF: JJEE HORAS EXC., AUX 1 HORAS EXC., AUX 2 HORAS EXC.
+        y += 15;
+        dibujarBarraSeccion(y, 'HORAS Y KM. EXCEDENTES / PEAJES');
+        y += 6;
+        dibujarCeldaConInput(13, y, 31, 13, 'JJEE HS EXC.:', d.jjeeHorasExc, false, true);
+        dibujarCeldaConInput(44, y, 31, 13, 'AUX 1 HS EXC.:', d.auxHorasExc, false, true);
+        dibujarCeldaConInput(75, y, 30, 13, 'AUX 2 HS EXC.:', d.aux2HorasExc, false, true);
+        dibujarCeldaConInput(13, y + 13, 92, 13, 'KM EXC.:', d.kmExc, true);
+        dibujarCeldaConInput(105, y, 92, 26, 'DETALLE DE PEAJES:', d.peajes, false);
+
+        y += 28;
+        dibujarBarraSeccion(y, 'TRANSPORTE CUSTODIADO');
+        y += 6;
+        dibujarEncabezadoTabla(13, y, 64, 5.5, 'EMPRESA / CHOFER');
+        dibujarEncabezadoTabla(77, y, 46, 5.5, 'CONTENEDOR');
+        dibujarEncabezadoTabla(123, y, 74, 5.5, 'PATENTE');
+
+        y += 5.5;
+        dibujarCeldaConInput(13, y, 64, 13.5, 'EMPRESA / CHOFER 1:', d.chofer1, false);
+        dibujarCeldaConInput(77, y, 46, 13.5, 'CONTENEDOR:', d.contenedor1, false);
+        dibujarCeldaPatenteDoble(123, y, 74, 13.5, d.chasis1, d.semi1, false);
+
+        y += 13.5;
+        dibujarCeldaConInput(13, y, 64, 13.5, 'EMPRESA / CHOFER 2:', d.chofer2, true);
+        dibujarCeldaConInput(77, y, 46, 13.5, 'CONTENEDOR:', d.contenedor2, true);
+        dibujarCeldaPatenteDoble(123, y, 74, 13.5, d.chasis2, d.semi2, true);
+
+        y += 15.5;
+        dibujarBarraSeccion(y, 'INFORMACIÓN DEL SERVICIO DE CUSTODIA');
+        y += 6;
+        dibujarEncabezadoTabla(13, y, 92, 5.5, 'SALIDA');
+        dibujarEncabezadoTabla(105, y, 92, 5.5, 'LLEGADA');
+
+        y += 5.5;
+        dibujarCeldaConInput(13, y, 42, 13.5, 'DIRECCIÓN SALIDA 1:', d.dirSalida, false);
+        dibujarCeldaConInput(55, y, 28, 13.5, 'LOCALIDAD:', d.locSalida, false);
+        dibujarCeldaConInput(83, y, 22, 13.5, 'HORA SALIDA:', d.horaSalida, false);
+
+        dibujarCeldaConInput(105, y, 42, 13.5, 'DIRECCIÓN LLEGADA 1:', d.dirLlegada, false);
+        dibujarCeldaConInput(147, y, 28, 13.5, 'LOCALIDAD:', d.locLlegada, false);
+        dibujarCeldaConInput(175, y, 22, 13.5, 'HORA LLEGADA:', d.horaLlegada, false);
+
+        y += 13.5;
+        dibujarCeldaConInput(13, y, 42, 13.5, 'DIRECCIÓN SALIDA 2:', d.dirSalida2, true);
+        dibujarCeldaConInput(55, y, 28, 13.5, 'LOCALIDAD:', d.locSalida2, true);
+        dibujarCeldaConInput(83, y, 22, 13.5, 'HORA SALIDA:', d.horaSalida2, true);
+
+        dibujarCeldaConInput(105, y, 42, 13.5, 'DIRECCIÓN LLEGADA 2:', d.dirLlegada2, true);
+        dibujarCeldaConInput(147, y, 28, 13.5, 'LOCALIDAD:', d.locLlegada2, true);
+        dibujarCeldaConInput(175, y, 22, 13.5, 'HORA LLEGADA:', d.horaLlegada2, true);
+
+        y += 15.5;
+        dibujarCeldaConInput(13, y, 184, 15, 'OBSERVACIONES:', d.observaciones, false);
+
+        y += 17;
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(13, y, 184, 34, 'FD');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(30, 41, 59);
+        doc.text('SELLO Y FIRMA DE RESPONSABLES:', 105, y + 4, { align: 'center' });
+
+        doc.setFontSize(6.8);
+        doc.text('FIRMA:', 17, y + 7.2);
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(100, 116, 139);
+        doc.setLineWidth(0.25);
+        doc.roundedRect(17, y + 8.2, 92, 23.5, 1, 1, 'FD');
+
+        if (d.firma) {
+            doc.addImage(d.firma, 'PNG', 20, y + 9.2, 86, 21.5);
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.8);
+        doc.setTextColor(30, 41, 59);
+        doc.text('APELLIDO Y NOMBRE:', 114, y + 9.2);
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(148, 163, 184);
+        doc.roundedRect(114, y + 10.5, 79, 8.2, 0.8, 0.8, 'FD');
+        if (d.firmaApellidoNombre) {
+            doc.setFontSize(8.5);
+            doc.setTextColor(0, 0, 0);
+            doc.text(String(d.firmaApellidoNombre).substring(0, 34), 116, y + 16);
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.8);
+        doc.setTextColor(30, 41, 59);
+        doc.text('DNI:', 114, y + 22.2);
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(148, 163, 184);
+        doc.roundedRect(114, y + 23.5, 79, 8.2, 0.8, 0.8, 'FD');
+        if (d.firmaDni) {
+            doc.setFontSize(8.5);
+            doc.setTextColor(0, 0, 0);
+            doc.text(String(d.firmaDni).substring(0, 20), 116, y + 29);
+        }
+
         const fotos = Array.isArray(d.fotosComprobantes) ? d.fotosComprobantes : [];
         if (fotos.length > 0) {
             doc.addPage();
@@ -5335,11 +5693,12 @@
                 }
             });
         }
+
         return doc;
     };
 
     // =========================================================
-    // G. RADAR GPS EN VIVO Y DESPACHO DE SERVICIOS (PC A CELULAR)
+    // G. RADAR GPS EN VIVO Y PRECARGA DE SERVICIOS CORREGIDA (JJEE, AUX 1 Y AUX 2)
     // =========================================================
     async function abrirModalRadarDespacho() {
         if (!esRolAdminOColaborador()) return;
@@ -5355,27 +5714,22 @@
     }
 
     function cargarSelectoresDespacho() {
-        const usuarios = obtenerListaUsuarios().filter(u => u.rol !== 'ADMIN');
+        const usuarios = obtenerListaUsuarios();
         const clientes = obtenerListaClientes().filter(c => colaboradorPuedeVerCliente(c.nombre));
 
         const selJ = document.getElementById('despCustodioJjee');
         const selA = document.getElementById('despCustodioAux');
+        const selA2 = document.getElementById('despCustodioAux2');
         const selC = document.getElementById('despCliente');
         const inpF = document.getElementById('despFecha');
 
-        if (selJ) {
-            selJ.innerHTML = usuarios.map(u => `<option value="${u.username}">${u.nombreCompleto || u.username} (${u.cuitDni || u.username})</option>`).join('');
-        }
-        if (selA) {
-            selA.innerHTML = '<option value="">-- SIN AUXILIAR --</option>' +
-                usuarios.map(u => `<option value="${u.username}">${u.nombreCompleto || u.username} (${u.cuitDni || u.username})</option>`).join('');
-        }
-        if (selC) {
-            selC.innerHTML = clientes.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
-        }
-        if (inpF && !inpF.value) {
-            inpF.value = new Date().toISOString().split('T')[0];
-        }
+        const opcionesCustodios = usuarios.map(u => `<option value="${u.username}">${u.nombreCompleto || u.username} (${u.cuitDni || u.username})</option>`).join('');
+
+        if (selJ) selJ.innerHTML = opcionesCustodios;
+        if (selA) selA.innerHTML = '<option value="">-- SIN AUXILIAR 1 --</option>' + opcionesCustodios;
+        if (selA2) selA2.innerHTML = '<option value="">-- SIN AUXILIAR 2 --</option>' + opcionesCustodios;
+        if (selC) selC.innerHTML = clientes.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+        if (inpF && !inpF.value) inpF.value = new Date().toISOString().split('T')[0];
     }
 
     function renderizarRadarYDespachos() {
@@ -5405,16 +5759,23 @@
         if (tbodyDesp) {
             const despVisibles = (despachosNube || []).filter(d => colaboradorPuedeVerCliente(d.cliente));
             if (despVisibles.length === 0) {
-                tbodyDesp.innerHTML = '<tr><td colspan="5" style="text-align:center;">NO HAY ÓRDENES DE SERVICIO PENDIENTES</td></tr>';
+                tbodyDesp.innerHTML = '<tr><td colspan="5" style="text-align:center;">NO HAY ÓRDENES PRECARGADAS PENDIENTES</td></tr>';
             } else {
                 tbodyDesp.innerHTML = despVisibles.map(d => `
                     <tr>
                         <td style="text-align:center; font-weight:bold;">${d.fecha || '-'}<br><span style="color:#1e3a8a;">${d.horaCitacion || ''}</span></td>
-                        <td style="font-weight:bold;">JJEE: ${d.nombreJjee || d.usernameJjee}<br>${d.nombreAux ? 'AUX: ' + d.nombreAux : ''}</td>
+                        <td style="font-weight:bold;">
+                            <div><b>JJEE:</b> ${d.nombreJjee || d.usernameJjee}</div>
+                            ${d.nombreAux ? `<div><b>AUX 1:</b> ${d.nombreAux}</div>` : ''}
+                            ${d.nombreAux2 ? `<div><b>AUX 2:</b> ${d.nombreAux2}</div>` : ''}
+                        </td>
                         <td style="text-align:center; font-weight:bold;">${d.cliente}</td>
                         <td style="text-align:center;">MÓVIL: ${d.numMovil || '-'} (${d.patenteMovil || '-'})<br>${d.modulo || ''}</td>
                         <td style="text-align:center;">
-                            <button type="button" class="btn-accion-chico btn-eliminar" onclick="eliminarDespachoPendiente('${d.idDespacho}')">CANCELAR</button>
+                            <div class="acciones-fila-usuarios">
+                                <button type="button" class="btn-accion-chico btn-cargar" style="width:auto; padding:6px 8px;" onclick="cargarDespachoEnPantallaManual('${d.idDespacho}')">📝 ABRIR EN PLANILLA</button>
+                                <button type="button" class="btn-accion-chico btn-eliminar" style="width:auto; padding:6px 8px;" onclick="eliminarDespachoPendiente('${d.idDespacho}')">BORRAR</button>
+                            </div>
                         </td>
                     </tr>
                 `).join('');
@@ -5425,6 +5786,7 @@
     async function crearDespachoServicio() {
         const userJ = document.getElementById('despCustodioJjee').value;
         const userA = document.getElementById('despCustodioAux').value;
+        const userA2 = document.getElementById('despCustodioAux2').value;
         const cli = document.getElementById('despCliente').value;
         const fec = document.getElementById('despFecha').value;
         const horaCit = document.getElementById('despHoraCitacion').value.trim();
@@ -5434,6 +5796,7 @@
         const padronU = obtenerListaUsuarios();
         const objJ = padronU.find(u => u.username === userJ) || {};
         const objA = padronU.find(u => u.username === userA) || {};
+        const objA2 = padronU.find(u => u.username === userA2) || {};
         const objM = obtenerListaMoviles().find(m => String(m.numero).toUpperCase() === numMov) || {};
 
         const nuevoDesp = {
@@ -5441,8 +5804,12 @@
             usernameJjee: userJ,
             nombreJjee: objJ.nombreCompleto || userJ,
             cuitJjee: objJ.cuitDni || '',
-            nombreAux: objA.nombreCompleto || '',
-            cunAux: objA.cuitDni || '',
+            usernameAux: userA || '',
+            nombreAux: userA ? (objA.nombreCompleto || userA) : '',
+            cunAux: userA ? (objA.cuitDni || '') : '',
+            usernameAux2: userA2 || '',
+            nombreAux2: userA2 ? (objA2.nombreCompleto || userA2) : '',
+            cunAux2: userA2 ? (objA2.cuitDni || '') : '',
             cliente: cli,
             fecha: fec,
             horaCitacion: horaCit,
@@ -5455,7 +5822,54 @@
         guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
         renderizarRadarYDespachos();
         await enviarAccionPostNube({ accion: 'guardarDespachos', despachos: despachosNube });
-        alert(`📲 ORDEN DE SERVICIO ENVIADA AL CELULAR DE ${nuevoDesp.nombreJjee}.`);
+
+        // Si el usuario logueado actualmente está en esa orden, se lo precarga en su planilla inmediatamente
+        verificarDespachoAsignadoAlCustodio(true);
+
+        const destinatarios = [nuevoDesp.nombreJjee, nuevoDesp.nombreAux, nuevoDesp.nombreAux2].filter(Boolean).join(' / ');
+        alert(`✅ ORDEN PRECARGADA EN EL SISTEMA PARA: ${destinatarios}.\n\nCuando cualquiera de ellos ingrese a la App con su Usuario, verá todos estos datos ya cargados en su Hoja de Ruta.`);
+    }
+
+    function aplicarDatosDespachoEnPlanilla(miDespacho) {
+        if (!miDespacho) return;
+        idDespachoCargadoActual = miDespacho.idDespacho;
+
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val || '';
+        };
+
+        if (miDespacho.fecha) setVal('fechaServicio', miDespacho.fecha);
+        if (miDespacho.cliente) setVal('clientePredeterminado', miDespacho.cliente);
+        setVal('horaCitacion', miDespacho.horaCitacion);
+        setVal('moduloServicio', miDespacho.modulo);
+        setVal('inputNombreJjee', miDespacho.nombreJjee);
+        setVal('inputCuitJjee', miDespacho.cuitJjee);
+        setVal('inputNombreAux', miDespacho.nombreAux);
+        setVal('inputCuitAux', miDespacho.cunAux);
+        setVal('inputNombreAux2', miDespacho.nombreAux2);
+        setVal('inputCuitAux2', miDespacho.cunAux2);
+        setVal('inputNumMovil', miDespacho.numMovil);
+        setVal('inputPatenteMovil', miDespacho.patenteMovil);
+
+        // Guardar encima del borrador para que el borrador automático nunca pise la orden precargada
+        guardarBorradorEnVivo();
+
+        const alerta = document.getElementById('mensajeExito');
+        if (alerta) {
+            alerta.style.backgroundColor = '#0284c7';
+            alerta.innerText = `📋 ORDEN DE SERVICIO PRECARGADA LISTA EN PLANILLA (${miDespacho.cliente} - CITACIÓN: ${miDespacho.horaCitacion || '--:--'})`;
+            alerta.style.display = 'block';
+            setTimeout(() => { alerta.style.display = 'none'; }, 5000);
+        }
+    }
+
+    function cargarDespachoEnPantallaManual(idDesp) {
+        const d = (despachosNube || []).find(x => String(x.idDespacho) === String(idDesp));
+        if (!d) return;
+        aplicarDatosDespachoEnPlanilla(d);
+        cerrarModalRadarDespacho();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function eliminarDespachoPendiente(idDesp) {
@@ -5465,25 +5879,28 @@
         await enviarAccionPostNube({ accion: 'guardarDespachos', despachos: despachosNube });
     }
 
-    function verificarDespachoAsignadoAlCustodio() {
-        if (!usuarioActivo || esRolAdminOColaborador()) return;
-        const miDespacho = (despachosNube || []).find(d =>
-            String(d.usernameJjee).toUpperCase() === String(usuarioActivo.username).toUpperCase()
-        );
-        if (!miDespacho || idDespachoCargadoActual === miDespacho.idDespacho) return;
+    // Verifica si el usuario que entró es JJEE, AUXILIAR 1 o AUXILIAR 2 en alguna orden pendiente
+    function verificarDespachoAsignadoAlCustodio(forzar = false) {
+        if (!usuarioActivo) return;
+        const miUser = String(usuarioActivo.username || '').trim().toUpperCase();
+        const miNombre = String(usuarioActivo.nombreCompleto || '').trim().toUpperCase();
 
-        idDespachoCargadoActual = miDespacho.idDespacho;
-        if (miDespacho.fecha) document.getElementById('fechaServicio').value = miDespacho.fecha;
-        if (miDespacho.cliente) document.getElementById('clientePredeterminado').value = miDespacho.cliente;
-        if (miDespacho.horaCitacion) document.getElementById('horaCitacion').value = miDespacho.horaCitacion;
-        if (miDespacho.modulo) document.getElementById('moduloServicio').value = miDespacho.modulo;
-        if (miDespacho.nombreJjee) document.getElementById('inputNombreJjee').value = miDespacho.nombreJjee;
-        if (miDespacho.cuitJjee) document.getElementById('inputCuitJjee').value = miDespacho.cuitJjee;
-        if (miDespacho.nombreAux) document.getElementById('inputNombreAux').value = miDespacho.nombreAux;
-        if (miDespacho.cunAux) document.getElementById('inputCuitAux').value = miDespacho.cunAux;
-        if (miDespacho.numMovil) document.getElementById('inputNumMovil').value = miDespacho.numMovil;
-        if (miDespacho.patenteMovil) document.getElementById('inputPatenteMovil').value = miDespacho.patenteMovil;
-        guardarBorradorEnVivo();
+        const miDespacho = (despachosNube || []).find(d => {
+            const uJ = String(d.usernameJjee || '').trim().toUpperCase();
+            const uA1 = String(d.usernameAux || '').trim().toUpperCase();
+            const uA2 = String(d.usernameAux2 || '').trim().toUpperCase();
+            const nJ = String(d.nombreJjee || '').trim().toUpperCase();
+            const nA1 = String(d.nombreAux || '').trim().toUpperCase();
+            const nA2 = String(d.nombreAux2 || '').trim().toUpperCase();
+
+            return (miUser && (uJ === miUser || uA1 === miUser || uA2 === miUser)) ||
+                   (miNombre && (nJ === miNombre || nA1 === miNombre || nA2 === miNombre));
+        });
+
+        if (!miDespacho) return;
+        if (!forzar && idDespachoCargadoActual === miDespacho.idDespacho) return;
+
+        aplicarDatosDespachoEnPlanilla(miDespacho);
     }
 
     // =========================================================
@@ -5505,7 +5922,7 @@
     }
 
     // =========================================================
-    // I. INTEGRACIÓN CON HISTORIAL, GUARDADO Y FILTRO DE CLIENTES DEL COLABORADOR
+    // I. INTEGRACIÓN CON HISTORIAL, EXCEL, ESTADÍSTICAS (CON AUX 2) Y PRECARGA
     // =========================================================
     const _aplicarInterfazOrig2 = aplicarInterfazPorUsuario;
     aplicarInterfazPorUsuario = function() {
@@ -5525,21 +5942,60 @@
         if (usuarioActivo) {
             verificarSiRequiereCambioClave();
             iniciarRastreoGpsContinuo();
-            verificarDespachoAsignadoAlCustodio();
+            // Se ejecuta después de los 60ms del borrador para que la orden precargada tenga prioridad siempre
+            setTimeout(() => {
+                verificarDespachoAsignadoAlCustodio(true);
+            }, 120);
         }
     };
 
-    // Filtrar historial respetando los clientes autorizados para cada Colaborador
-    const _obtenerHistorialFiltradoOrig = obtenerHistorialFiltradoActual;
+    // Buscador de Historial incluyendo AUXILIAR 2 + filtro por cliente de Colaborador
     obtenerHistorialFiltradoActual = function() {
-        const base = _obtenerHistorialFiltradoOrig();
-        if (esRolColaborador()) {
-            return base.filter(item => colaboradorPuedeVerCliente(item.cliente));
+        const inpBuscar = document.getElementById('inputBuscarHistorial');
+        const terminoBusqueda = inpBuscar ? inpBuscar.value.trim().toUpperCase() : '';
+
+        let historialTotal = [];
+        try {
+            historialTotal = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
+            if (!Array.isArray(historialTotal)) historialTotal = [];
+        } catch (e) { historialTotal = []; }
+
+        let historialVisible = [];
+        if (esRolAdminOColaborador()) {
+            const elFiltro = document.getElementById('selectFiltroUsuario');
+            const filtro = elFiltro ? elFiltro.value : 'TODOS';
+            if (filtro && filtro !== 'TODOS') {
+                historialVisible = historialTotal.filter(item => (item.creadoPor || 'ADMIN') === filtro);
+            } else {
+                historialVisible = historialTotal;
+            }
+            if (esRolColaborador()) {
+                historialVisible = historialVisible.filter(item => colaboradorPuedeVerCliente(item.cliente));
+            }
+        } else if (usuarioActivo) {
+            historialVisible = historialTotal.filter(item => item.creadoPor === usuarioActivo.username);
         }
-        return base;
+
+        if (terminoBusqueda !== '') {
+            historialVisible = historialVisible.filter(item => {
+                const textoCompletoHoja = [
+                    item.numHoja, item.fecha, item.creadoPor, item.cliente,
+                    item.nombreJjee, item.cuitJjee,
+                    item.nombreAux, item.cunAux,
+                    item.nombreAux2, item.cunAux2,
+                    item.numMovil, item.patenteMovil, item.remito, item.modulo,
+                    item.chofer1, item.contenedor1, item.chasis1, item.semi1,
+                    item.chofer2, item.contenedor2, item.chasis2, item.semi2,
+                    item.dirSalida, item.locSalida, item.dirLlegada, item.locLlegada,
+                    item.observaciones, item.firmaApellidoNombre, item.firmaDni
+                ].map(v => String(v || '').toUpperCase()).join(' | ');
+                return textoCompletoHoja.includes(terminoBusqueda);
+            });
+        }
+        return historialVisible;
     };
 
-    // Mostrar enlaces de GPS de Inicio y Fin en la tabla de Historial
+    // Mostrar AUXILIAR 2 y enlaces de GPS Inicio/Fin en la tabla de Historial
     const _mostrarHistorialBase = mostrarHistorial;
     mostrarHistorial = function() {
         _mostrarHistorialBase();
@@ -5549,7 +6005,9 @@
         const filas = tbody.querySelectorAll('tr');
         historialVisible.forEach((item, idx) => {
             const fila = filas[idx];
-            if (!fila || !fila.cells || fila.cells.length < 2) return;
+            if (!fila || !fila.cells || fila.cells.length < 6) return;
+
+            // Agregar GPS Inicio y Fin en columna Fecha
             const celdaFecha = fila.cells[1];
             if (celdaFecha && !celdaFecha.querySelector('.links-gps-historial')) {
                 const divGps = document.createElement('div');
@@ -5563,23 +6021,155 @@
                 `;
                 celdaFecha.appendChild(divGps);
             }
+
+            // Mostrar AUX 2 si fue cargado en la hoja
+            const celdaCustodios = fila.cells[4];
+            if (celdaCustodios && (item.nombreAux2 || item.cunAux2) && !celdaCustodios.innerHTML.includes('AUX 2:')) {
+                const divAux2 = document.createElement('div');
+                divAux2.innerHTML = `<b>AUX 2:</b> ${item.nombreAux2 || '-'} (${item.cunAux2 || '-'})`;
+                celdaCustodios.insertBefore(divAux2, celdaCustodios.lastElementChild);
+            }
         });
     };
 
-    // Filtrar y valorizar el Tablero de Control de Horas respetando permisos de Colaborador
-    const _obtenerDatosConsolidadosOrig = obtenerDatosConsolidadosControl;
+    // Sumar también a AUXILIAR 2 en el Tablero de Control de Horas y Estadísticas
     obtenerDatosConsolidadosControl = function() {
         let historial = [];
         try { historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || []; } catch (e) { historial = []; }
-        if (esRolColaborador()) {
-            const filtradoPorColab = historial.filter(h => colaboradorPuedeVerCliente(h.cliente));
-            const backup = leerStorageSeguro('hojasDeRutaLince', '[]');
-            guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(filtradoPorColab));
-            const res = _obtenerDatosConsolidadosOrig();
-            guardarStorageSeguro('hojasDeRutaLince', backup);
-            return res;
+
+        const mesFiltro = (document.getElementById('selectMesEstadisticas') || {}).value || 'TODOS';
+        const cliFiltro = (document.getElementById('selectClienteEstadisticas') || {}).value || 'TODOS';
+        const busqCustodio = ((document.getElementById('inputBuscarCustodioStats') || {}).value || '').trim().toUpperCase();
+
+        const hojasFiltradas = historial.filter(h => {
+            if (!colaboradorPuedeVerCliente(h.cliente)) return false;
+            if (mesFiltro !== 'TODOS' && (!h.fecha || !h.fecha.startsWith(mesFiltro))) return false;
+            if (cliFiltro !== 'TODOS' && String(h.cliente || 'EDESUR S.A').trim().toUpperCase() !== cliFiltro) return false;
+            return true;
+        });
+
+        const mapaCustodios = new Map();
+        const mapaClientes = new Map();
+
+        obtenerListaUsuarios().forEach(u => {
+            if (u.rol === 'ADMIN') return;
+            const clave = (u.nombreCompleto || u.username || '').trim().toUpperCase();
+            if (!clave) return;
+            mapaCustodios.set(clave, {
+                nombre: clave,
+                cuitDni: u.cuitDni || '-',
+                viajesJjee: 0,
+                viajesAux: 0,
+                totalViajes: 0,
+                minutosTotales: 0,
+                minutosExc: 0,
+                kilometros: 0
+            });
+        });
+
+        function obtenerORegistrarCustodio(nombreRaw, cuitRaw) {
+            const custPadron = buscarCustodioPorDniOCuit(cuitRaw) || buscarCustodioPorNombre(nombreRaw);
+            const claveNombre = custPadron
+                ? (custPadron.nombreCompleto || custPadron.username).trim().toUpperCase()
+                : String(nombreRaw || '').trim().toUpperCase();
+            if (!claveNombre) return null;
+
+            if (!mapaCustodios.has(claveNombre)) {
+                mapaCustodios.set(claveNombre, {
+                    nombre: claveNombre,
+                    cuitDni: (custPadron && custPadron.cuitDni) ? custPadron.cuitDni : (cuitRaw || '-'),
+                    viajesJjee: 0,
+                    viajesAux: 0,
+                    totalViajes: 0,
+                    minutosTotales: 0,
+                    minutosExc: 0,
+                    kilometros: 0
+                });
+            }
+            const reg = mapaCustodios.get(claveNombre);
+            if ((reg.cuitDni === '-' || !reg.cuitDni) && cuitRaw) reg.cuitDni = cuitRaw;
+            return reg;
         }
-        return _obtenerDatosConsolidadosOrig();
+
+        let kpiServicios = 0;
+        let kpiMinutosTotales = 0;
+        let kpiMinutosExc = 0;
+        let kpiKilometros = 0;
+
+        hojasFiltradas.forEach(h => {
+            kpiServicios++;
+            const minServicio = calcularMinutosServicio(h.horaCitacion, h.horaFinalizacion);
+            const minConMinimo4Hs = minServicio > 0 ? Math.max(240, minServicio) : 0;
+            const minExcJjee = parsearTextoHorasAMinutos(h.jjeeHorasExc);
+            const minExcAux1 = parsearTextoHorasAMinutos(h.auxHorasExc);
+            const minExcAux2 = parsearTextoHorasAMinutos(h.aux2HorasExc);
+            const minRealHoja = minConMinimo4Hs > 0 ? minConMinimo4Hs : Math.max(minExcJjee, minExcAux1, minExcAux2);
+            const kmHoja = parseFloat(h.kilometros) || 0;
+
+            kpiMinutosTotales += minRealHoja;
+            kpiMinutosExc += Math.max(minExcJjee, minExcAux1, minExcAux2);
+            kpiKilometros += kmHoja;
+
+            // 1. Sumar a JJEE
+            const nomJjee = h.nombreJjee || h.creadoPor || '';
+            if (nomJjee) {
+                const regJ = obtenerORegistrarCustodio(nomJjee, h.cuitJjee);
+                if (regJ) {
+                    regJ.viajesJjee++;
+                    regJ.totalViajes++;
+                    regJ.minutosTotales += minRealHoja;
+                    regJ.minutosExc += (minExcJjee > 0 ? minExcJjee : minRealHoja);
+                    regJ.kilometros += kmHoja;
+                }
+            }
+
+            // 2. Sumar a AUXILIAR 1
+            if (h.nombreAux || h.cunAux) {
+                const regA1 = obtenerORegistrarCustodio(h.nombreAux || h.cunAux, h.cunAux);
+                if (regA1) {
+                    regA1.viajesAux++;
+                    regA1.totalViajes++;
+                    regA1.minutosTotales += minRealHoja;
+                    regA1.minutosExc += (minExcAux1 > 0 ? minExcAux1 : minRealHoja);
+                    regA1.kilometros += kmHoja;
+                }
+            }
+
+            // 3. Sumar a AUXILIAR 2
+            if (h.nombreAux2 || h.cunAux2) {
+                const regA2 = obtenerORegistrarCustodio(h.nombreAux2 || h.cunAux2, h.cunAux2);
+                if (regA2) {
+                    regA2.viajesAux++;
+                    regA2.totalViajes++;
+                    regA2.minutosTotales += minRealHoja;
+                    regA2.minutosExc += (minExcAux2 > 0 ? minExcAux2 : minRealHoja);
+                    regA2.kilometros += kmHoja;
+                }
+            }
+
+            // 4. Sumar por Cliente
+            const nomCli = String(h.cliente || 'EDESUR S.A').trim().toUpperCase();
+            if (!mapaClientes.has(nomCli)) {
+                mapaClientes.set(nomCli, { cliente: nomCli, servicios: 0, minutosTotales: 0, minutosExc: 0, kilometros: 0 });
+            }
+            const regCli = mapaClientes.get(nomCli);
+            regCli.servicios++;
+            regCli.minutosTotales += minRealHoja;
+            regCli.minutosExc += Math.max(minExcJjee, minExcAux1, minExcAux2);
+            regCli.kilometros += kmHoja;
+        });
+
+        let listaCustodios = Array.from(mapaCustodios.values());
+        if (busqCustodio !== '') {
+            listaCustodios = listaCustodios.filter(c =>
+                c.nombre.includes(busqCustodio) || String(c.cuitDni).includes(busqCustodio)
+            );
+        }
+        listaCustodios.sort((a, b) => b.minutosTotales - a.minutosTotales || b.totalViajes - a.totalViajes);
+
+        const listaClientes = Array.from(mapaClientes.values()).sort((a, b) => b.servicios - a.servicios);
+
+        return { kpiServicios, kpiMinutosTotales, kpiMinutosExc, kpiKilometros, listaCustodios, listaClientes };
     };
 
     const _renderizarEstadisticasOrig = renderizarEstadisticasControl;
@@ -5613,7 +6203,112 @@
         }
     };
 
-    // Extender Sincronización con la Nube para recibir Radar GPS, Despachos y Tarifas
+    // Exportación a Excel actualizada con AUXILIAR 2, AUX 2 HORAS EXC. y Links GPS Inicio / Fin
+    exportarHistorialAExcel = function() {
+        if (!esRolAdminOColaborador()) {
+            alert('SOLO EL ADMINISTRADOR O COLABORADOR PUEDE EXPORTAR EL REPORTE A EXCEL.');
+            return;
+        }
+
+        const listaHoja = obtenerHistorialFiltradoActual();
+        if (listaHoja.length === 0) {
+            alert('NO HAY HOJAS DE RUTA EN LA VISTA ACTUAL PARA EXPORTAR.');
+            return;
+        }
+
+        const clientesMap = {};
+        obtenerListaClientes().forEach(c => {
+            clientesMap[String(c.nombre || '').toUpperCase()] = c.cuit || '';
+        });
+
+        const encabezados = [
+            'N° HOJA DE RUTA',
+            'FECHA SERVICIO',
+            'USUARIO CREADOR',
+            'FECHA Y HORA REAL DE CARGA',
+            'CLIENTE',
+            'CUIT CLIENTE (SOLO ADMIN)',
+            'NOMBRE JJEE',
+            'CUIT / DNI JJEE',
+            'NOMBRE AUXILIAR 1',
+            'CUIT / DNI AUXILIAR 1',
+            'NOMBRE AUXILIAR 2',
+            'CUIT / DNI AUXILIAR 2',
+            'N° MÓVIL',
+            'PATENTE MÓVIL',
+            'HORA CITACIÓN',
+            'HORA FINALIZACIÓN',
+            'JJEE HORAS EXC.',
+            'AUX 1 HORAS EXC.',
+            'AUX 2 HORAS EXC.',
+            'KILÓMETROS',
+            'KM EXCEDENTES',
+            'REMITO N°',
+            'MÓDULO',
+            'PEAJES',
+            'GPS INICIO (GOOGLE MAPS)',
+            'GPS FIN (GOOGLE MAPS)',
+            'RESPONSABLE FIRMA',
+            'DNI RESPONSABLE FIRMA',
+            'OBSERVACIONES'
+        ];
+
+        const escaparCeldaCsv = (valor) => {
+            const limpio = String(valor === undefined || valor === null ? '' : valor).replace(/\r?\n/g, ' ').replace(/"/g, '""');
+            return `"${limpio}"`;
+        };
+
+        const filasCsv = [encabezados.map(escaparCeldaCsv).join(';')];
+
+        listaHoja.forEach(item => {
+            const nomCli = String(item.cliente || 'EDESUR S.A').toUpperCase();
+            const cuitCli = esRolAdmin() ? (clientesMap[nomCli] || '') : 'CONFIDENCIAL';
+            const fila = [
+                item.numHoja || '',
+                item.fecha || '',
+                item.creadoPor || '',
+                item.fechaHoraCargaReal || '',
+                nomCli,
+                cuitCli,
+                item.nombreJjee || '',
+                item.cuitJjee || '',
+                item.nombreAux || '',
+                item.cunAux || '',
+                item.nombreAux2 || '',
+                item.cunAux2 || '',
+                item.numMovil || '',
+                item.patenteMovil || '',
+                item.horaCitacion || '',
+                item.horaFinalizacion || '',
+                item.jjeeHorasExc || '',
+                item.auxHorasExc || '',
+                item.aux2HorasExc || '',
+                item.kilometros || '',
+                item.kmExc || '',
+                item.remito || '',
+                item.modulo || '',
+                item.peajes || '',
+                formatearLinkMaps(item.gpsInicio),
+                formatearLinkMaps(item.gpsFin),
+                item.firmaApellidoNombre || '',
+                item.firmaDni || '',
+                item.observaciones || ''
+            ];
+            filasCsv.push(fila.map(escaparCeldaCsv).join(';'));
+        });
+
+        const contenidoCsv = '\uFEFF' + filasCsv.join('\r\n');
+        const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Facturacion_Hojas_de_Ruta_Lince_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+    };
+
     const _sincronizarEstadoOrig = sincronizarEstadoCompletoConNube;
     sincronizarEstadoCompletoConNube = async function(subirLocal = false, forzarRedibujado = false) {
         await _sincronizarEstadoOrig(subirLocal, forzarRedibujado);
@@ -5628,7 +6323,7 @@
                 if (d && Array.isArray(d.despachos)) {
                     despachosNube = d.despachos;
                     guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
-                    verificarDespachoAsignadoAlCustodio();
+                    verificarDespachoAsignadoAlCustodio(false);
                 }
                 if (d && d.tarifas) {
                     tarifasActualesLince = d.tarifas;
@@ -5646,16 +6341,13 @@
         } catch (e) {}
     };
 
-    // Extender Guardado de Hoja de Ruta para grabar GPS Inicio, GPS Fin y Fotos de Comprobantes
     const _guardarHojaOrig2 = guardarHojaDeRuta;
     guardarHojaDeRuta = async function() {
-        // Sellar las horas bajo la regla del mínimo de 4 hs si no es Admin editando a mano
         if (!esRolAdmin()) {
             calcularHorasExcedentes();
         }
         await _guardarHojaOrig2();
 
-        // Asociar GPS Inicio, GPS Fin y Fotos a la hoja recién guardada en el tope del historial
         try {
             let historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
             if (historial.length > 0) {
@@ -5664,12 +6356,13 @@
                 historial[0].fotosComprobantes = fotosComprobantesActuales.slice();
                 if (idDespachoCargadoActual) {
                     historial[0].idDespachoOrigen = idDespachoCargadoActual;
+                    despachosNube = (despachosNube || []).filter(x => String(x.idDespacho) !== String(idDespachoCargadoActual));
+                    guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
                 }
                 guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(historial));
             }
         } catch (e) {}
 
-        // Reiniciar fotos y GPS de inicio para la próxima hoja
         fotosComprobantesActuales = [];
         gpsInicioActual = null;
         idDespachoCargadoActual = null;
@@ -5678,12 +6371,12 @@
         mostrarHistorial();
     };
 
-    // Inicializar al cargar
     inyectarControlesNuevosEnDOM();
     if (usuarioActivo) {
         aplicarBloqueoEdicionHorasExcedentes();
         verificarSiRequiereCambioClave();
         iniciarRastreoGpsContinuo();
+        setTimeout(() => verificarDespachoAsignadoAlCustodio(true), 120);
     }
 </script>
 </body>
