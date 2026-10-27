@@ -932,6 +932,9 @@
         <span id="lblRolUsuario" class="badge-rol">ROL</span>
     </div>
     <div class="botones-sesion">
+        <button type="button" id="btnRadarDespacho" class="btn-top-3d btn-nube-admin" style="display: none; background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%); box-shadow: 0 4px 0 #7f1d1d;" onclick="abrirModalRadarDespacho()">
+            📍 RADAR GPS / DESPACHO
+        </button>
         <button type="button" id="btnControlHoras" class="btn-top-3d btn-control-horas" style="display: none;" onclick="abrirModalEstadisticas()">
             📊 CONTROL DE HORAS Y ESTADÍSTICAS
         </button>
@@ -4628,6 +4631,1060 @@
         inicializarSistemaCompleto();
     }
 </script>
+<!-- =========================================================
+     11. MODAL DE CAMBIO DE CLAVE PERSONAL POR ÚNICA VEZ
+     ========================================================= -->
+<div id="modalCambioClaveObligatorio" class="modal-fondo" style="z-index: 12000; background: rgba(15, 23, 42, 0.96);">
+    <div class="modal-contenido" style="max-width: 430px; margin-top: 60px; text-align: center;">
+        <div class="modal-cabecera" style="justify-content: center;">
+            <h3>🔐 CAMBIO DE CLAVE PERSONAL (POR ÚNICA VEZ)</h3>
+        </div>
+        <p style="font-size: 13px; color: #1e293b; line-height: 1.4;">
+            Hola <b id="lblNombreCambioClave">-</b>. Por seguridad, creá tu <b>nueva clave personal</b> por única vez. Con esta clave vas a ingresar siempre a partir de ahora.
+        </p>
+        <div style="text-align: left; margin-bottom: 12px;">
+            <span class="etiqueta-celda">NUEVA CLAVE PERSONAL:</span>
+            <input type="password" id="inputNuevaClavePersonal1" placeholder="ESCRIBÍ TU NUEVA CLAVE" style="text-align: center; font-size: 15px;">
+        </div>
+        <div style="text-align: left; margin-bottom: 16px;">
+            <span class="etiqueta-celda">REPETIR NUEVA CLAVE:</span>
+            <input type="password" id="inputNuevaClavePersonal2" placeholder="REPETÍ TU NUEVA CLAVE" style="text-align: center; font-size: 15px;">
+        </div>
+        <button type="button" id="btnConfirmarCambioClave" class="btn-3d btn-guardar" style="width: 100%;" onclick="confirmarCambioClavePersonal()">
+            💾 GUARDAR MI CLAVE Y CONTINUAR
+        </button>
+    </div>
+</div>
 
+<!-- =========================================================
+     12. MODAL DE RADAR GPS EN VIVO + DESPACHO DE SERVICIOS
+     ========================================================= -->
+<div id="modalRadarDespacho" class="modal-fondo">
+    <div class="modal-contenido" style="max-width: 960px;">
+        <div class="modal-cabecera">
+            <h3>📍 RADAR GPS EN TIEMPO REAL Y DESPACHO DE SERVICIOS</h3>
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalRadarDespacho()">✖ CERRAR</button>
+        </div>
+
+        <div class="seccion-titulo" style="margin-top: 0;">📡 UBICACIÓN GPS EN VIVO DE CUSTODIOS ACTIVOS (ACTUALIZACIÓN CONTINUA)</div>
+        <table class="tabla-responsive" style="margin-bottom: 18px;">
+            <thead>
+                <tr>
+                    <th style="width: 24%;">CUSTODIO</th>
+                    <th style="width: 18%;">HOJA / CLIENTE ACTUAL</th>
+                    <th style="width: 18%;">ÚLTIMO REPORTE</th>
+                    <th style="width: 22%;">COORDENADAS</th>
+                    <th style="width: 18%;">MAPA EN VIVO</th>
+                </tr>
+            </thead>
+            <tbody id="tablaRadarGpsVivo"></tbody>
+        </table>
+
+        <div class="seccion-titulo">📋 DESPACHAR / PRECARGAR ORDEN DE SERVICIO A UN CUSTODIO</div>
+        <table class="tabla-responsive" style="margin-bottom: 12px;">
+            <tbody>
+                <tr>
+                    <td style="width: 25%;">
+                        <span class="etiqueta-celda">ASIGNAR A CUSTODIO (JJEE):</span>
+                        <select id="despCustodioJjee"></select>
+                    </td>
+                    <td style="width: 25%;">
+                        <span class="etiqueta-celda">CUSTODIO AUXILIAR (OPCIONAL):</span>
+                        <select id="despCustodioAux"></select>
+                    </td>
+                    <td style="width: 25%;">
+                        <span class="etiqueta-celda">CLIENTE / EMPRESA:</span>
+                        <select id="despCliente"></select>
+                    </td>
+                    <td style="width: 25%;">
+                        <span class="etiqueta-celda">FECHA DEL SERVICIO:</span>
+                        <input type="date" id="despFecha">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="etiqueta-celda">HORA DE CITACIÓN:</span>
+                        <input type="text" id="despHoraCitacion" placeholder="EJ: 07:00">
+                    </td>
+                    <td>
+                        <span class="etiqueta-celda">MÓVIL ASIGNADO:</span>
+                        <input type="text" id="despMovil" list="listaNumerosMoviles" placeholder="N° MÓVIL">
+                    </td>
+                    <td>
+                        <span class="etiqueta-celda">MÓDULO / REFERENCIA:</span>
+                        <input type="text" id="despModulo" placeholder="EJ: MÓDULO MÍN. 4 HS">
+                    </td>
+                    <td style="text-align: center;">
+                        <button type="button" class="btn-accion-chico btn-descargar-item" style="width: 100%; padding: 10px;" onclick="crearDespachoServicio()">
+                            📲 ENVIAR ORDEN AL CELULAR
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="seccion-titulo">ÓRDENES DE SERVICIO PENDIENTES ENVIADAS A CUSTODIOS</div>
+        <table class="tabla-responsive">
+            <thead>
+                <tr>
+                    <th style="width: 14%;">FECHA / HORA</th>
+                    <th style="width: 24%;">CUSTODIO JJEE / AUX</th>
+                    <th style="width: 22%;">CLIENTE</th>
+                    <th style="width: 20%;">MÓVIL / MÓDULO</th>
+                    <th style="width: 20%;">ACCIÓN</th>
+                </tr>
+            </thead>
+            <tbody id="tablaDespachosPendientes"></tbody>
+        </table>
+    </div>
+</div>
+
+<script id="superMejorasCorporativasLince">
+    // =========================================================
+    // A. INYECCIÓN AUTOMÁTICA DE CONTROLES VISUALES EN LA PLANILLA Y MODALES
+    // =========================================================
+    let fotosComprobantesActuales = []; // [{ tipo: 'REMITO'|'PEAJE', dataUrl: '...' }]
+    let gpsInicioActual = null;
+    let gpsVivoActual = null;
+    let watchIdGpsLince = null;
+    let ultimoEnvioGpsNubeMs = 0;
+    let idDespachoCargadoActual = null;
+    let tarifasActualesLince = { valorHoraCustodio: 0, valorHoraCliente: 0, valorKm: 0 };
+    let ubicacionesVivoNube = {};
+    let despachosNube = [];
+
+    function inyectarControlesNuevosEnDOM() {
+        // 1. Inyectar selector de Clientes Permitidos y Checkbox de Cambio de Clave adentro de #modalUsuarios
+        const selectRol = document.getElementById('nuevoUserRol');
+        if (selectRol && !document.getElementById('contenedorPermisosColaborador')) {
+            const filaPermisos = document.createElement('tr');
+            filaPermisos.id = 'filaPermisosEspecialesUser';
+            filaPermisos.innerHTML = `
+                <td colspan="5" style="background: #f8fafc; padding: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <label style="font-size: 12px; font-weight: bold; color: #1e293b; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" id="chkForzarCambioClave" checked style="width: 16px; height: 16px;">
+                            🔐 Pedirle que cambie su clave personal por única vez en su próximo ingreso
+                        </label>
+                        <div id="contenedorPermisosColaborador" style="display: none; width: 100%; border-top: 1px solid #cbd5e1; padding-top: 8px; margin-top: 4px;">
+                            <span class="etiqueta-celda" style="color: #7c3aed; font-size: 11.5px;">🏢 SELECCIONÁ QUÉ CLIENTES PUEDE VER ESTE COLABORADOR EN EL HISTORIAL Y ESTADÍSTICAS:</span>
+                            <div id="listaChecksClientesColaborador" style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px;"></div>
+                        </div>
+                    </div>
+                </td>
+            `;
+            const tbodyModalUser = selectRol.closest('tbody');
+            if (tbodyModalUser) {
+                tbodyModalUser.insertBefore(filaPermisos, tbodyModalUser.lastElementChild);
+            }
+            selectRol.addEventListener('change', actualizarVisibilidadChecksColaborador);
+        }
+
+        // 2. Inyectar Botones de Cámara para Fotos de Comprobantes (Remito y Peajes)
+        const campoPeajes = document.querySelector('[data-campo="peajes"]');
+        if (campoPeajes && !document.getElementById('bloqueFotosComprobantes')) {
+            const divFotos = document.createElement('div');
+            divFotos.id = 'bloqueFotosComprobantes';
+            divFotos.style.marginTop = '6px';
+            divFotos.innerHTML = `
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <label class="btn-firma" style="background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%); margin: 0; display: inline-block;">
+                        📷 FOTO TICKET PEAJE / REMITO
+                        <input type="file" id="inputFotoComprobante" accept="image/*" capture="environment" style="display: none;" onchange="agregarFotoComprobante(this)">
+                    </label>
+                    <span id="lblCantidadFotos" style="font-size: 11px; font-weight: bold; color: #143627;">0 FOTOS ADJUNTAS</span>
+                </div>
+                <div id="galeriaFotosComprobantes" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;"></div>
+            `;
+            campoPeajes.parentNode.appendChild(divFotos);
+        }
+
+        // 3. Inyectar Barra de Tarifas de Pre-Liquidación en #modalEstadisticas (Solo visible para ADMIN)
+        const modalStats = document.getElementById('modalEstadisticas');
+        const gridKpi = modalStats ? modalStats.querySelector('.grid-tarjetas-control') : null;
+        if (gridKpi && !document.getElementById('barraTarifasAdmin')) {
+            const divTarifas = document.createElement('div');
+            divTarifas.id = 'barraTarifasAdmin';
+            divTarifas.style.cssText = 'background: #fefce8; border: 2px solid #ca8a04; padding: 10px; border-radius: 6px; margin-bottom: 14px; display: none;';
+            divTarifas.innerHTML = `
+                <div style="font-size: 11.5px; font-weight: bold; color: #854d0e; margin-bottom: 8px;">
+                    💲 VALORIZACIÓN AUTOMÁTICA Y PRE-LIQUIDACIÓN (EXCLUSIVO ADMINISTRADOR):
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+                    <div style="flex: 1; min-width: 160px;">
+                        <span class="etiqueta-celda">VALOR HORA CUSTODIO ($):</span>
+                        <input type="number" id="inpTarifaHoraCustodio" placeholder="EJ: 8500" oninput="actualizarTarifasEnVivo()">
+                    </div>
+                    <div style="flex: 1; min-width: 160px;">
+                        <span class="etiqueta-celda">VALOR HORA A FACTURAR CLIENTE ($):</span>
+                        <input type="number" id="inpTarifaHoraCliente" placeholder="EJ: 15000" oninput="actualizarTarifasEnVivo()">
+                    </div>
+                    <div style="flex: 1; min-width: 140px;">
+                        <span class="etiqueta-celda">VALOR POR KM ($):</span>
+                        <input type="number" id="inpTarifaKm" placeholder="EJ: 900" oninput="actualizarTarifasEnVivo()">
+                    </div>
+                    <button type="button" class="btn-accion-chico btn-descargar-item" style="width: auto; padding: 9px 14px;" onclick="guardarTarifasEnNube()">
+                        💾 FIJAR VALORES
+                    </button>
+                </div>
+            `;
+            gridKpi.parentNode.insertBefore(divTarifas, gridKpi);
+        }
+    }
+
+    // =========================================================
+    // B. REGLA DEL MÓDULO MÍNIMO DE 4 HORAS + BLOQUEO PARA CUSTODIOS (SOLO ADMIN EDITA)
+    // =========================================================
+    calcularHorasExcedentes = function() {
+        const valInicio = document.getElementById('horaCitacion').value;
+        const valFin = document.getElementById('horaFinalizacion').value;
+
+        if (!valInicio || !valFin || !valInicio.includes(':') || !valFin.includes(':')) return;
+
+        const [hInicio, mInicio] = valInicio.split(':').map(Number);
+        const [hFin, mFin] = valFin.split(':').map(Number);
+
+        let minutosInicio = hInicio * 60 + mInicio;
+        let minutosFin = hFin * 60 + mFin;
+
+        if (minutosFin < minutosInicio) {
+            minutosFin += 24 * 60;
+        }
+
+        let minutosTrabajados = minutosFin - minutosInicio;
+        // REGLA OFICIAL LINCE: El módulo mínimo de arranque es siempre de 4 horas (240 minutos).
+        // Si trabajó entre 1 minuto y 3:59 hs, se computan 04:00 HS. De 4 hs en adelante va la hora real.
+        let minutosComputados = minutosTrabajados < 240 ? 240 : minutosTrabajados;
+
+        const horas = Math.floor(minutosComputados / 60);
+        const minutos = minutosComputados % 60;
+        const textoResultado = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')} HS`;
+
+        const inpJ = document.getElementById('jjeeHorasExc');
+        const inpA = document.getElementById('auxHorasExc');
+        if (inpJ) {
+            inpJ.value = textoResultado;
+            inpJ.classList.add('campo-auto');
+        }
+        if (inpA) {
+            inpA.value = textoResultado;
+            inpA.classList.add('campo-auto');
+        }
+    };
+
+    function aplicarBloqueoEdicionHorasExcedentes() {
+        const inpJ = document.getElementById('jjeeHorasExc');
+        const inpA = document.getElementById('auxHorasExc');
+        const puedeEditar = esRolAdmin();
+        if (inpJ) inpJ.readOnly = !puedeEditar;
+        if (inpA) inpA.readOnly = !puedeEditar;
+    }
+
+    // =========================================================
+    // C. GPS SIEMPRE ACTIVO (EN VIVO CONTINUO + PUNTO DE INICIO Y FIN)
+    // =========================================================
+    function formatearLinkMaps(gpsObj) {
+        if (!gpsObj || !gpsObj.lat || !gpsObj.lng) return '';
+        return `https://www.google.com/maps?q=${gpsObj.lat},${gpsObj.lng}`;
+    }
+
+    function iniciarRastreoGpsContinuo() {
+        if (!('geolocation' in navigator)) return;
+
+        // 1. Capturar posición inicial inmediata
+        navigator.geolocation.getCurrentPosition((pos) => {
+            registrarCoordenadaRecibida(pos);
+        }, () => {}, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+
+        // 2. Dejar encendido el rastreador continuo en todo momento
+        if (watchIdGpsLince !== null) {
+            navigator.geolocation.clearWatch(watchIdGpsLince);
+        }
+        watchIdGpsLince = navigator.geolocation.watchPosition((pos) => {
+            registrarCoordenadaRecibida(pos);
+        }, () => {}, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+    }
+
+    function registrarCoordenadaRecibida(pos) {
+        if (!pos || !pos.coords) return;
+        const punto = {
+            lat: Number(pos.coords.latitude.toFixed(6)),
+            lng: Number(pos.coords.longitude.toFixed(6)),
+            precision: Math.round(pos.coords.accuracy || 0),
+            hora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+            fechaHora: new Date().toLocaleString('es-AR')
+        };
+        gpsVivoActual = punto;
+
+        // Si la planilla actual todavía no tenía GPS de Inicio, lo sella automáticamente
+        const guardadoPrevio = leerStorageSeguro('gpsInicioBorradorLince', '');
+        if (!guardadoPrevio) {
+            gpsInicioActual = punto;
+            guardarStorageSeguro('gpsInicioBorradorLince', JSON.stringify(punto));
+        } else if (!gpsInicioActual) {
+            try { gpsInicioActual = JSON.parse(guardadoPrevio); } catch (e) { gpsInicioActual = punto; }
+        }
+
+        // Reportar a la nube para que el ADMIN vea dónde está en el Radar GPS en Vivo
+        const ahoraMs = Date.now();
+        if (usuarioActivo && navigator.onLine && (ahoraMs - ultimoEnvioGpsNubeMs > 20000)) {
+            ultimoEnvioGpsNubeMs = ahoraMs;
+            const numH = (document.getElementById('numHojaRuta') || {}).value || '';
+            const cliH = (document.getElementById('clientePredeterminado') || {}).value || '';
+            enviarAccionPostNube({
+                accion: 'reportarGpsVivo',
+                username: usuarioActivo.username,
+                ubicacion: {
+                    username: usuarioActivo.username,
+                    nombreCompleto: usuarioActivo.nombreCompleto || usuarioActivo.username,
+                    lat: punto.lat,
+                    lng: punto.lng,
+                    fechaHora: punto.fechaHora,
+                    numHojaActual: numH,
+                    clienteActual: cliH
+                }
+            });
+        }
+    }
+
+    // =========================================================
+    // D. CAMBIO DE CLAVE PERSONAL OBLIGATORIO POR ÚNICA VEZ (VISIBLE PARA ADMIN)
+    // =========================================================
+    function verificarSiRequiereCambioClave() {
+        if (!usuarioActivo || esRolAdmin()) {
+            document.getElementById('modalCambioClaveObligatorio').style.display = 'none';
+            return;
+        }
+        // Si requiereCambioClave es true (o si nunca la cambió todavía), abre el modal obligatorio
+        if (usuarioActivo.requiereCambioClave !== false) {
+            document.getElementById('lblNombreCambioClave').innerText = usuarioActivo.nombreCompleto || usuarioActivo.username;
+            document.getElementById('inputNuevaClavePersonal1').value = '';
+            document.getElementById('inputNuevaClavePersonal2').value = '';
+            document.getElementById('modalCambioClaveObligatorio').style.display = 'block';
+        } else {
+            document.getElementById('modalCambioClaveObligatorio').style.display = 'none';
+        }
+    }
+
+    async function confirmarCambioClavePersonal() {
+        if (!usuarioActivo) return;
+        const c1 = (document.getElementById('inputNuevaClavePersonal1').value || '').trim().toUpperCase();
+        const c2 = (document.getElementById('inputNuevaClavePersonal2').value || '').trim().toUpperCase();
+
+        if (!c1 || c1.length < 3) {
+            alert('⚠️ LA NUEVA CLAVE DEBE TENER AL MENOS 3 CARACTERES.');
+            return;
+        }
+        if (c1 !== c2) {
+            alert('⚠️ LAS DOS CLAVES INGRESADAS NO COINCIDEN. VOLVÉ A ESCRIBIRLAS.');
+            return;
+        }
+        if (c1 === String(usuarioActivo.clave).toUpperCase()) {
+            alert('⚠️ ELEGÍ UNA CLAVE NUEVA DISTINTA A LA ANTERIOR.');
+            return;
+        }
+
+        const btn = document.getElementById('btnConfirmarCambioClave');
+        btn.disabled = true;
+        btn.innerText = 'ACTUALIZANDO CLAVE EN SISTEMA...';
+
+        try {
+            // 1. Actualizar en el padrón local para que el Admin vea la clave nueva en su tabla
+            const usuarios = obtenerListaUsuarios();
+            usuarios.forEach(u => {
+                if (String(u.username).toUpperCase() === String(usuarioActivo.username).toUpperCase()) {
+                    u.clave = c1;
+                    u.requiereCambioClave = false;
+                }
+            });
+            guardarStorageSeguro('usuariosLince', JSON.stringify(usuarios));
+
+            usuarioActivo.clave = c1;
+            usuarioActivo.requiereCambioClave = false;
+            guardarSesionSegura('sesionActivaLince', JSON.stringify(usuarioActivo));
+
+            // 2. Actualizar en la nube para que el Administrador tenga siempre la clave nueva disponible
+            if (navigator.onLine) {
+                await enviarAccionPostNube({
+                    accion: 'cambiarClavePersonal',
+                    username: usuarioActivo.username,
+                    nuevaClave: c1
+                });
+                await guardarUsuariosEnNube(usuarios);
+            }
+
+            document.getElementById('modalCambioClaveObligatorio').style.display = 'none';
+            alert(`✅ ¡TU NUEVA CLAVE PERSONAL (${c1}) QUEDÓ GUARDADA CON ÉXITO!`);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = '💾 GUARDAR MI CLAVE Y CONTINUAR';
+        }
+    }
+
+    // =========================================================
+    // E. PERMISOS DE CLIENTES ESPECÍFICOS PARA CADA COLABORADOR
+    // =========================================================
+    function actualizarVisibilidadChecksColaborador(clientesSeleccionados = ['TODOS']) {
+        const selectRol = document.getElementById('nuevoUserRol');
+        const cont = document.getElementById('contenedorPermisosColaborador');
+        const listaDiv = document.getElementById('listaChecksClientesColaborador');
+        if (!selectRol || !cont || !listaDiv) return;
+
+        if (selectRol.value === 'COLABORADOR') {
+            cont.style.display = 'block';
+            const clientes = obtenerListaClientes();
+            const todosMarcados = !Array.isArray(clientesSeleccionados) || clientesSeleccionados.includes('TODOS');
+            listaDiv.innerHTML = clientes.map(c => {
+                const nom = String(c.nombre).toUpperCase();
+                const checked = (todosMarcados || clientesSeleccionados.includes(nom)) ? 'checked' : '';
+                return `
+                    <label style="background: #ffffff; border: 1px solid #94a3b8; padding: 5px 10px; border-radius: 4px; font-size: 11.5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" class="chk-cliente-colab" value="${nom.replace(/"/g, '&quot;')}" ${checked}>
+                        🏢 ${nom}
+                    </label>
+                `;
+            }).join('');
+        } else {
+            cont.style.display = 'none';
+        }
+    }
+
+    function obtenerClientesPermitidosDelFormulario() {
+        const selectRol = document.getElementById('nuevoUserRol');
+        if (!selectRol || selectRol.value !== 'COLABORADOR') return ['TODOS'];
+        const marcados = [];
+        document.querySelectorAll('.chk-cliente-colab:checked').forEach(chk => {
+            marcados.push(chk.value.toUpperCase());
+        });
+        return marcados;
+    }
+
+    function colaboradorPuedeVerCliente(nombreClienteHoja) {
+        if (esRolAdmin()) return true;
+        if (!esRolColaborador()) return true;
+        const permitidos = usuarioActivo.clientesPermitidos;
+        if (!Array.isArray(permitidos) || permitidos.includes('TODOS')) return true;
+        const cliLimpio = String(nombreClienteHoja || 'EDESUR S.A').trim().toUpperCase();
+        return permitidos.map(x => String(x).trim().toUpperCase()).includes(cliLimpio);
+    }
+
+    // Sobrescribir gestión de usuarios para incluir Clientes Permitidos y Cambio de Clave
+    fusionarUsuariosLocalYNube = function(listaNube, listaLocal) {
+        const mapa = new Map();
+        (listaLocal || []).forEach(u => {
+            if (u && u.username) mapa.set(String(u.username).toUpperCase(), u);
+        });
+        (listaNube || []).forEach(uNube => {
+            if (!uNube || !uNube.username) return;
+            const clave = String(uNube.username).toUpperCase();
+            const prev = mapa.get(clave) || {};
+            mapa.set(clave, {
+                username: clave,
+                clave: uNube.clave || prev.clave || '1234',
+                rol: uNube.rol || prev.rol || 'USUARIO',
+                nombreCompleto: uNube.nombreCompleto || prev.nombreCompleto || clave,
+                cuitDni: uNube.cuitDni || prev.cuitDni || '',
+                requiereCambioClave: uNube.requiereCambioClave !== undefined ? uNube.requiereCambioClave : (prev.requiereCambioClave !== undefined ? prev.requiereCambioClave : (clave !== 'ADMIN')),
+                clientesPermitidos: Array.isArray(uNube.clientesPermitidos) ? uNube.clientesPermitidos : (Array.isArray(prev.clientesPermitidos) ? prev.clientesPermitidos : ['TODOS'])
+            });
+        });
+        return Array.from(mapa.values());
+    };
+
+    seleccionarUsuarioParaModificar = function(index) {
+        if (!esRolAdmin()) return;
+        const usuarios = obtenerListaUsuarios();
+        const u = usuarios[index];
+        if (!u) return;
+
+        indiceUsuarioEditando = index;
+        document.getElementById('nuevoUserNombre').value = u.username || '';
+        document.getElementById('nuevoUserClave').value = u.clave || '';
+        document.getElementById('nuevoUserNombreCompleto').value = u.nombreCompleto || u.username || '';
+        document.getElementById('nuevoUserCuitDni').value = u.cuitDni || '';
+        document.getElementById('nuevoUserRol').value = u.rol || 'USUARIO';
+
+        const chkCambio = document.getElementById('chkForzarCambioClave');
+        if (chkCambio) chkCambio.checked = Boolean(u.requiereCambioClave);
+
+        actualizarVisibilidadChecksColaborador(u.clientesPermitidos || ['TODOS']);
+
+        document.getElementById('avisoEdicionUsuario').style.display = 'block';
+        document.getElementById('lblUsuarioEnEdicion').innerText = `${u.username} (${u.nombreCompleto || ''})`;
+        document.getElementById('btnGuardarUsuarioModal').innerText = '💾 GUARDAR CAMBIOS';
+        document.getElementById('btnCancelarEdicionUser').style.display = 'inline-block';
+        document.getElementById('nuevoUserNombre').focus();
+    };
+
+    const _cancelarModoEdicionUsuarioOrig = cancelarModoEdicionUsuario;
+    cancelarModoEdicionUsuario = function() {
+        _cancelarModoEdicionUsuarioOrig();
+        const chkCambio = document.getElementById('chkForzarCambioClave');
+        if (chkCambio) chkCambio.checked = true;
+        actualizarVisibilidadChecksColaborador(['TODOS']);
+    };
+
+    guardarOCrearUsuario = function() {
+        if (!esRolAdmin()) return;
+        const nom = document.getElementById('nuevoUserNombre').value.trim().toUpperCase();
+        const cla = document.getElementById('nuevoUserClave').value.trim().toUpperCase();
+        const nomComp = (document.getElementById('nuevoUserNombreCompleto').value.trim() || nom).toUpperCase();
+        const cuitDni = document.getElementById('nuevoUserCuitDni').value.trim().toUpperCase();
+        const rolElegido = document.getElementById('nuevoUserRol').value || 'USUARIO';
+        const pedirCambio = document.getElementById('chkForzarCambioClave') ? document.getElementById('chkForzarCambioClave').checked : true;
+        const clientesPerm = obtenerClientesPermitidosDelFormulario();
+
+        if (!nom || !cla) {
+            alert('COMPLETÁ EL USUARIO Y LA CLAVE DE ACCESO.');
+            return;
+        }
+        if (rolElegido === 'COLABORADOR' && clientesPerm.length === 0) {
+            alert('SELECCIONÁ AL MENOS UN CLIENTE PARA QUE PUEDA VER ESTE COLABORADOR.');
+            return;
+        }
+
+        const usuarios = obtenerListaUsuarios();
+
+        if (indiceUsuarioEditando !== null) {
+            const usuarioAntiguo = usuarios[indiceUsuarioEditando];
+            if (!usuarioAntiguo) return;
+
+            const duplicado = usuarios.some((u, idx) => idx !== indiceUsuarioEditando && u.username === nom);
+            if (duplicado) {
+                alert('ESE NOMBRE DE USUARIO YA ESTÁ SIENDO USADO POR OTRO CUSTODIO.');
+                return;
+            }
+
+            const nombreViejo = usuarioAntiguo.username;
+            usuarioAntiguo.username = nom;
+            usuarioAntiguo.clave = cla;
+            usuarioAntiguo.nombreCompleto = nomComp;
+            usuarioAntiguo.cuitDni = cuitDni;
+            usuarioAntiguo.rol = rolElegido;
+            usuarioAntiguo.requiereCambioClave = rolElegido === 'ADMIN' ? false : pedirCambio;
+            usuarioAntiguo.clientesPermitidos = clientesPerm;
+
+            guardarStorageSeguro('usuariosLince', JSON.stringify(usuarios));
+            guardarUsuariosEnNube(usuarios);
+            actualizarDatalistsCustodios();
+
+            if (nombreViejo !== nom) {
+                let historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]'));
+                historial.forEach(h => { if (h.creadoPor === nombreViejo) h.creadoPor = nom; });
+                guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(historial));
+            }
+
+            cancelarModoEdicionUsuario();
+            renderizarTablaUsuarios();
+            actualizarSelectorFiltroUsuarios();
+            mostrarHistorial();
+            return;
+        }
+
+        if (usuarios.some(u => u.username === nom)) {
+            alert('ESE USUARIO YA EXISTE. USÁ EL BOTÓN AMARILLO "MODIFICAR" PARA EDITARLO.');
+            return;
+        }
+
+        usuarios.push({
+            username: nom,
+            clave: cla,
+            rol: rolElegido,
+            nombreCompleto: nomComp,
+            cuitDni: cuitDni,
+            requiereCambioClave: rolElegido === 'ADMIN' ? false : pedirCambio,
+            clientesPermitidos: clientesPerm
+        });
+        guardarStorageSeguro('usuariosLince', JSON.stringify(usuarios));
+        guardarUsuariosEnNube(usuarios);
+        actualizarDatalistsCustodios();
+
+        cancelarModoEdicionUsuario();
+        renderizarTablaUsuarios();
+        actualizarSelectorFiltroUsuarios();
+    };
+
+    renderizarTablaUsuarios = function() {
+        const tbody = document.getElementById('tablaListaUsuarios');
+        const usuarios = obtenerListaUsuarios();
+
+        tbody.innerHTML = usuarios.map((u, idx) => {
+            let colorRol = '#2563eb';
+            let textoRol = 'CUSTODIO';
+            if (u.rol === 'ADMIN') { colorRol = '#16a34a'; textoRol = 'ADMIN'; }
+            if (u.rol === 'COLABORADOR') { colorRol = '#7c3aed'; textoRol = 'COLABORADOR'; }
+
+            const leyendaClientes = (u.rol === 'COLABORADOR' && Array.isArray(u.clientesPermitidos))
+                ? `<div style="font-size:10px; color:#5b21b6; margin-top:3px;">🏢 Clientes: ${u.clientesPermitidos.join(', ')}</div>`
+                : '';
+
+            const estadoClave = (u.rol !== 'ADMIN' && u.requiereCambioClave !== false)
+                ? `<div style="font-size:9.5px; color:#d97706;">⏳ Cambiará al entrar</div>`
+                : `<div style="font-size:9.5px; color:#16a34a;">✔ Clave personal activa</div>`;
+
+            return `
+            <tr>
+                <td style="font-weight:bold; text-align:center;">${u.username}</td>
+                <td style="font-weight:bold; color:#143627;">
+                    <div>${u.nombreCompleto || u.username}</div>
+                    ${leyendaClientes}
+                </td>
+                <td style="text-align:center; font-weight:bold;">${u.cuitDni || '-'}</td>
+                <td style="text-align:center; font-weight:bold;">
+                    <div style="font-size:13px; color:#0f172a;">🔑 ${u.clave}</div>
+                    ${estadoClave}
+                </td>
+                <td style="text-align:center;"><span style="background:${colorRol}; color:#fff; padding:3px 7px; border-radius:4px; font-size:10.5px; font-weight:bold;">${textoRol}</span></td>
+                <td style="text-align:center;">
+                    <div class="acciones-fila-usuarios">
+                        <button type="button" class="btn-accion-chico btn-modificar-user" onclick="seleccionarUsuarioParaModificar(${idx})">MODIFICAR</button>
+                        ${u.username === 'ADMIN' ? '' :
+                        `<button type="button" class="btn-accion-chico btn-eliminar" onclick="eliminarUsuario(${idx})">BORRAR</button>`}
+                    </div>
+                </td>
+            </tr>
+            `;
+        }).join('');
+    };
+
+    // =========================================================
+    // F. FOTOS DE PEAJES Y REMITOS EN 2DA HOJA DEL PDF
+    // =========================================================
+    function agregarFotoComprobante(inputEl) {
+        if (!inputEl.files || !inputEl.files[0]) return;
+        const archivo = inputEl.files[0];
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const img = new Image();
+            img.onload = function() {
+                const maxDim = 950;
+                let w = img.width;
+                let h = img.height;
+                if (w > maxDim || h > maxDim) {
+                    const r = Math.min(maxDim / w, maxDim / h);
+                    w = Math.round(w * r);
+                    h = Math.round(h * r);
+                }
+                const c = document.createElement('canvas');
+                c.width = w;
+                c.height = h;
+                const g = c.getContext('2d');
+                g.fillStyle = '#ffffff';
+                g.fillRect(0, 0, w, h);
+                g.drawImage(img, 0, 0, w, h);
+                const comprimida = c.toDataURL('image/jpeg', 0.72);
+                fotosComprobantesActuales.push({
+                    fechaHora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+                    dataUrl: comprimida
+                });
+                renderizarGaleriaFotosComprobantes();
+                inputEl.value = '';
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(archivo);
+    }
+
+    function eliminarFotoComprobante(idx) {
+        fotosComprobantesActuales.splice(idx, 1);
+        renderizarGaleriaFotosComprobantes();
+    }
+
+    function renderizarGaleriaFotosComprobantes() {
+        const gal = document.getElementById('galeriaFotosComprobantes');
+        const lbl = document.getElementById('lblCantidadFotos');
+        if (lbl) lbl.innerText = `${fotosComprobantesActuales.length} FOTO(S) ADJUNTA(S)`;
+        if (!gal) return;
+        gal.innerHTML = fotosComprobantesActuales.map((f, idx) => `
+            <div style="position: relative; border: 2px solid #143627; border-radius: 4px; padding: 2px; background: #fff;">
+                <img src="${f.dataUrl}" style="height: 54px; width: auto; display: block; border-radius: 2px;">
+                <button type="button" onclick="eliminarFotoComprobante(${idx})" style="position: absolute; top: -6px; right: -6px; background: #dc2626; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold; cursor: pointer;">✖</button>
+            </div>
+        `).join('');
+    }
+
+    // Extender construirDocumentoPDF para agregar la Hoja 2 con las fotos adjuntas
+    const _construirDocumentoPDFOrig = construirDocumentoPDF;
+    construirDocumentoPDF = async function(d) {
+        const doc = await _construirDocumentoPDFOrig(d);
+        const fotos = Array.isArray(d.fotosComprobantes) ? d.fotosComprobantes : [];
+        if (fotos.length > 0) {
+            doc.addPage();
+            doc.setFillColor(20, 54, 39);
+            doc.rect(13, 12, 184, 8, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(255, 255, 255);
+            doc.text(`ANEXO DE COMPROBANTES Y PEAJES - HOJA DE RUTA N° ${d.numHoja || '00000000'}`, 105, 17.5, { align: 'center' });
+
+            let yFoto = 26;
+            fotos.forEach((f, idx) => {
+                if (yFoto > 210) {
+                    doc.addPage();
+                    yFoto = 20;
+                }
+                const imgData = typeof f === 'string' ? f : f.dataUrl;
+                if (imgData) {
+                    doc.setFontSize(8.5);
+                    doc.setTextColor(30, 41, 59);
+                    doc.text(`COMPROBANTE ADJUNTO #${idx + 1}`, 15, yFoto);
+                    try {
+                        doc.addImage(imgData, 'JPEG', 15, yFoto + 3, 180, 110);
+                    } catch (e) {}
+                    yFoto += 120;
+                }
+            });
+        }
+        return doc;
+    };
+
+    // =========================================================
+    // G. RADAR GPS EN VIVO Y DESPACHO DE SERVICIOS (PC A CELULAR)
+    // =========================================================
+    async function abrirModalRadarDespacho() {
+        if (!esRolAdminOColaborador()) return;
+        cargarSelectoresDespacho();
+        renderizarRadarYDespachos();
+        document.getElementById('modalRadarDespacho').style.display = 'block';
+        await sincronizarEstadoCompletoConNube(false, true);
+        renderizarRadarYDespachos();
+    }
+
+    function cerrarModalRadarDespacho() {
+        document.getElementById('modalRadarDespacho').style.display = 'none';
+    }
+
+    function cargarSelectoresDespacho() {
+        const usuarios = obtenerListaUsuarios().filter(u => u.rol !== 'ADMIN');
+        const clientes = obtenerListaClientes().filter(c => colaboradorPuedeVerCliente(c.nombre));
+
+        const selJ = document.getElementById('despCustodioJjee');
+        const selA = document.getElementById('despCustodioAux');
+        const selC = document.getElementById('despCliente');
+        const inpF = document.getElementById('despFecha');
+
+        if (selJ) {
+            selJ.innerHTML = usuarios.map(u => `<option value="${u.username}">${u.nombreCompleto || u.username} (${u.cuitDni || u.username})</option>`).join('');
+        }
+        if (selA) {
+            selA.innerHTML = '<option value="">-- SIN AUXILIAR --</option>' +
+                usuarios.map(u => `<option value="${u.username}">${u.nombreCompleto || u.username} (${u.cuitDni || u.username})</option>`).join('');
+        }
+        if (selC) {
+            selC.innerHTML = clientes.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+        }
+        if (inpF && !inpF.value) {
+            inpF.value = new Date().toISOString().split('T')[0];
+        }
+    }
+
+    function renderizarRadarYDespachos() {
+        const tbodyRadar = document.getElementById('tablaRadarGpsVivo');
+        if (tbodyRadar) {
+            const listaUbi = Object.values(ubicacionesVivoNube || {}).filter(u => u && u.lat && colaboradorPuedeVerCliente(u.clienteActual));
+            if (listaUbi.length === 0) {
+                tbodyRadar.innerHTML = '<tr><td colspan="5" style="text-align:center;">NO HAY CUSTODIOS TRANSMITIENDO GPS EN ESTE MOMENTO</td></tr>';
+            } else {
+                tbodyRadar.innerHTML = listaUbi.map(u => `
+                    <tr>
+                        <td style="font-weight:bold; color:#143627;">🟢 ${u.nombreCompleto || u.username}</td>
+                        <td style="text-align:center; font-weight:bold;">${u.numHojaActual || '-'} (${u.clienteActual || '-'})</td>
+                        <td style="text-align:center;">🕒 ${u.fechaHora || '-'}</td>
+                        <td style="text-align:center; font-size:11px;">${u.lat}, ${u.lng}</td>
+                        <td style="text-align:center;">
+                            <a href="https://www.google.com/maps?q=${u.lat},${u.lng}" target="_blank" class="btn-accion-chico btn-cargar" style="text-decoration:none; display:inline-block; width:auto; padding:6px 10px;">
+                                🗺️ VER EN MAPA
+                            </a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        const tbodyDesp = document.getElementById('tablaDespachosPendientes');
+        if (tbodyDesp) {
+            const despVisibles = (despachosNube || []).filter(d => colaboradorPuedeVerCliente(d.cliente));
+            if (despVisibles.length === 0) {
+                tbodyDesp.innerHTML = '<tr><td colspan="5" style="text-align:center;">NO HAY ÓRDENES DE SERVICIO PENDIENTES</td></tr>';
+            } else {
+                tbodyDesp.innerHTML = despVisibles.map(d => `
+                    <tr>
+                        <td style="text-align:center; font-weight:bold;">${d.fecha || '-'}<br><span style="color:#1e3a8a;">${d.horaCitacion || ''}</span></td>
+                        <td style="font-weight:bold;">JJEE: ${d.nombreJjee || d.usernameJjee}<br>${d.nombreAux ? 'AUX: ' + d.nombreAux : ''}</td>
+                        <td style="text-align:center; font-weight:bold;">${d.cliente}</td>
+                        <td style="text-align:center;">MÓVIL: ${d.numMovil || '-'} (${d.patenteMovil || '-'})<br>${d.modulo || ''}</td>
+                        <td style="text-align:center;">
+                            <button type="button" class="btn-accion-chico btn-eliminar" onclick="eliminarDespachoPendiente('${d.idDespacho}')">CANCELAR</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+    }
+
+    async function crearDespachoServicio() {
+        const userJ = document.getElementById('despCustodioJjee').value;
+        const userA = document.getElementById('despCustodioAux').value;
+        const cli = document.getElementById('despCliente').value;
+        const fec = document.getElementById('despFecha').value;
+        const horaCit = document.getElementById('despHoraCitacion').value.trim();
+        const numMov = document.getElementById('despMovil').value.trim().toUpperCase();
+        const mod = document.getElementById('despModulo').value.trim().toUpperCase();
+
+        const padronU = obtenerListaUsuarios();
+        const objJ = padronU.find(u => u.username === userJ) || {};
+        const objA = padronU.find(u => u.username === userA) || {};
+        const objM = obtenerListaMoviles().find(m => String(m.numero).toUpperCase() === numMov) || {};
+
+        const nuevoDesp = {
+            idDespacho: String(Date.now()),
+            usernameJjee: userJ,
+            nombreJjee: objJ.nombreCompleto || userJ,
+            cuitJjee: objJ.cuitDni || '',
+            nombreAux: objA.nombreCompleto || '',
+            cunAux: objA.cuitDni || '',
+            cliente: cli,
+            fecha: fec,
+            horaCitacion: horaCit,
+            numMovil: numMov,
+            patenteMovil: objM.patente || '',
+            modulo: mod
+        };
+
+        despachosNube.push(nuevoDesp);
+        guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
+        renderizarRadarYDespachos();
+        await enviarAccionPostNube({ accion: 'guardarDespachos', despachos: despachosNube });
+        alert(`📲 ORDEN DE SERVICIO ENVIADA AL CELULAR DE ${nuevoDesp.nombreJjee}.`);
+    }
+
+    async function eliminarDespachoPendiente(idDesp) {
+        despachosNube = (despachosNube || []).filter(d => String(d.idDespacho) !== String(idDesp));
+        guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
+        renderizarRadarYDespachos();
+        await enviarAccionPostNube({ accion: 'guardarDespachos', despachos: despachosNube });
+    }
+
+    function verificarDespachoAsignadoAlCustodio() {
+        if (!usuarioActivo || esRolAdminOColaborador()) return;
+        const miDespacho = (despachosNube || []).find(d =>
+            String(d.usernameJjee).toUpperCase() === String(usuarioActivo.username).toUpperCase()
+        );
+        if (!miDespacho || idDespachoCargadoActual === miDespacho.idDespacho) return;
+
+        idDespachoCargadoActual = miDespacho.idDespacho;
+        if (miDespacho.fecha) document.getElementById('fechaServicio').value = miDespacho.fecha;
+        if (miDespacho.cliente) document.getElementById('clientePredeterminado').value = miDespacho.cliente;
+        if (miDespacho.horaCitacion) document.getElementById('horaCitacion').value = miDespacho.horaCitacion;
+        if (miDespacho.modulo) document.getElementById('moduloServicio').value = miDespacho.modulo;
+        if (miDespacho.nombreJjee) document.getElementById('inputNombreJjee').value = miDespacho.nombreJjee;
+        if (miDespacho.cuitJjee) document.getElementById('inputCuitJjee').value = miDespacho.cuitJjee;
+        if (miDespacho.nombreAux) document.getElementById('inputNombreAux').value = miDespacho.nombreAux;
+        if (miDespacho.cunAux) document.getElementById('inputCuitAux').value = miDespacho.cunAux;
+        if (miDespacho.numMovil) document.getElementById('inputNumMovil').value = miDespacho.numMovil;
+        if (miDespacho.patenteMovil) document.getElementById('inputPatenteMovil').value = miDespacho.patenteMovil;
+        guardarBorradorEnVivo();
+    }
+
+    // =========================================================
+    // H. TARIFAS Y PRE-LIQUIDACIÓN EN EL TABLERO DE ESTADÍSTICAS
+    // =========================================================
+    function actualizarTarifasEnVivo() {
+        tarifasActualesLince.valorHoraCustodio = parseFloat((document.getElementById('inpTarifaHoraCustodio') || {}).value) || 0;
+        tarifasActualesLince.valorHoraCliente = parseFloat((document.getElementById('inpTarifaHoraCliente') || {}).value) || 0;
+        tarifasActualesLince.valorKm = parseFloat((document.getElementById('inpTarifaKm') || {}).value) || 0;
+        renderizarEstadisticasControl();
+    }
+
+    async function guardarTarifasEnNube() {
+        if (!esRolAdmin()) return;
+        actualizarTarifasEnVivo();
+        guardarStorageSeguro('tarifasLince', JSON.stringify(tarifasActualesLince));
+        await enviarAccionPostNube({ accion: 'guardarTarifas', tarifas: tarifasActualesLince });
+        alert('💲 VALORES DE HORA Y KM GUARDADOS EN LA NUBE.');
+    }
+
+    // =========================================================
+    // I. INTEGRACIÓN CON HISTORIAL, GUARDADO Y FILTRO DE CLIENTES DEL COLABORADOR
+    // =========================================================
+    const _aplicarInterfazOrig2 = aplicarInterfazPorUsuario;
+    aplicarInterfazPorUsuario = function() {
+        inyectarControlesNuevosEnDOM();
+        _aplicarInterfazOrig2();
+        aplicarBloqueoEdicionHorasExcedentes();
+
+        const btnRadar = document.getElementById('btnRadarDespacho');
+        if (btnRadar) {
+            btnRadar.style.display = esRolAdminOColaborador() ? 'inline-block' : 'none';
+        }
+        const barraTar = document.getElementById('barraTarifasAdmin');
+        if (barraTar) {
+            barraTar.style.display = esRolAdmin() ? 'block' : 'none';
+        }
+
+        if (usuarioActivo) {
+            verificarSiRequiereCambioClave();
+            iniciarRastreoGpsContinuo();
+            verificarDespachoAsignadoAlCustodio();
+        }
+    };
+
+    // Filtrar historial respetando los clientes autorizados para cada Colaborador
+    const _obtenerHistorialFiltradoOrig = obtenerHistorialFiltradoActual;
+    obtenerHistorialFiltradoActual = function() {
+        const base = _obtenerHistorialFiltradoOrig();
+        if (esRolColaborador()) {
+            return base.filter(item => colaboradorPuedeVerCliente(item.cliente));
+        }
+        return base;
+    };
+
+    // Mostrar enlaces de GPS de Inicio y Fin en la tabla de Historial
+    const _mostrarHistorialBase = mostrarHistorial;
+    mostrarHistorial = function() {
+        _mostrarHistorialBase();
+        const tbody = document.getElementById('tablaHistorial');
+        if (!tbody) return;
+        const historialVisible = obtenerHistorialFiltradoActual();
+        const filas = tbody.querySelectorAll('tr');
+        historialVisible.forEach((item, idx) => {
+            const fila = filas[idx];
+            if (!fila || !fila.cells || fila.cells.length < 2) return;
+            const celdaFecha = fila.cells[1];
+            if (celdaFecha && !celdaFecha.querySelector('.links-gps-historial')) {
+                const divGps = document.createElement('div');
+                divGps.className = 'links-gps-historial';
+                divGps.style.marginTop = '4px';
+                const linkIni = formatearLinkMaps(item.gpsInicio);
+                const linkFin = formatearLinkMaps(item.gpsFin);
+                divGps.innerHTML = `
+                    ${linkIni ? `<a href="${linkIni}" target="_blank" style="font-size:10px; font-weight:bold; color:#15803d; text-decoration:none; margin-right:6px;">📍 GPS INICIO</a>` : ''}
+                    ${linkFin ? `<a href="${linkFin}" target="_blank" style="font-size:10px; font-weight:bold; color:#1d4ed8; text-decoration:none;">🏁 GPS FIN</a>` : ''}
+                `;
+                celdaFecha.appendChild(divGps);
+            }
+        });
+    };
+
+    // Filtrar y valorizar el Tablero de Control de Horas respetando permisos de Colaborador
+    const _obtenerDatosConsolidadosOrig = obtenerDatosConsolidadosControl;
+    obtenerDatosConsolidadosControl = function() {
+        let historial = [];
+        try { historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || []; } catch (e) { historial = []; }
+        if (esRolColaborador()) {
+            const filtradoPorColab = historial.filter(h => colaboradorPuedeVerCliente(h.cliente));
+            const backup = leerStorageSeguro('hojasDeRutaLince', '[]');
+            guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(filtradoPorColab));
+            const res = _obtenerDatosConsolidadosOrig();
+            guardarStorageSeguro('hojasDeRutaLince', backup);
+            return res;
+        }
+        return _obtenerDatosConsolidadosOrig();
+    };
+
+    const _renderizarEstadisticasOrig = renderizarEstadisticasControl;
+    renderizarEstadisticasControl = function() {
+        _renderizarEstadisticasOrig();
+        if (!esRolAdmin()) return;
+
+        const datos = obtenerDatosConsolidadosControl();
+        const tbodyCust = document.getElementById('tablaEstadisticasCustodios');
+        if (tbodyCust && datos.listaCustodios.length > 0 && tarifasActualesLince.valorHoraCustodio > 0) {
+            const filas = tbodyCust.querySelectorAll('tr');
+            datos.listaCustodios.forEach((c, idx) => {
+                const f = filas[idx];
+                if (f && f.cells[3]) {
+                    const monto = Math.round((c.minutosTotales / 60) * tarifasActualesLince.valorHoraCustodio + (c.kilometros * tarifasActualesLince.valorKm));
+                    f.cells[3].innerHTML += `<div style="font-size:10.5px; color:#15803d; margin-top:2px;">💲 $${monto.toLocaleString('es-AR')}</div>`;
+                }
+            });
+        }
+
+        const tbodyCli = document.getElementById('tablaEstadisticasClientes');
+        if (tbodyCli && datos.listaClientes.length > 0 && tarifasActualesLince.valorHoraCliente > 0) {
+            const filasC = tbodyCli.querySelectorAll('tr');
+            datos.listaClientes.forEach((cli, idx) => {
+                const f = filasC[idx];
+                if (f && f.cells[2]) {
+                    const montoFact = Math.round((cli.minutosTotales / 60) * tarifasActualesLince.valorHoraCliente + (cli.kilometros * tarifasActualesLince.valorKm));
+                    f.cells[2].innerHTML += `<div style="font-size:10.5px; color:#b45309; margin-top:2px;">💰 Facturar: $${montoFact.toLocaleString('es-AR')}</div>`;
+                }
+            });
+        }
+    };
+
+    // Extender Sincronización con la Nube para recibir Radar GPS, Despachos y Tarifas
+    const _sincronizarEstadoOrig = sincronizarEstadoCompletoConNube;
+    sincronizarEstadoCompletoConNube = async function(subirLocal = false, forzarRedibujado = false) {
+        await _sincronizarEstadoOrig(subirLocal, forzarRedibujado);
+        if (!navigator.onLine) return;
+        try {
+            const u = obtenerUrlActivaNube();
+            const sep = u.includes('?') ? '&' : '?';
+            const r = await fetch(u + sep + 'accion=obtenerEstado&t=' + Date.now(), { method: 'GET', redirect: 'follow', cache: 'no-store' });
+            if (r.ok) {
+                const d = await r.json();
+                if (d && d.ubicacionesVivo) ubicacionesVivoNube = d.ubicacionesVivo;
+                if (d && Array.isArray(d.despachos)) {
+                    despachosNube = d.despachos;
+                    guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
+                    verificarDespachoAsignadoAlCustodio();
+                }
+                if (d && d.tarifas) {
+                    tarifasActualesLince = d.tarifas;
+                    const i1 = document.getElementById('inpTarifaHoraCustodio');
+                    const i2 = document.getElementById('inpTarifaHoraCliente');
+                    const i3 = document.getElementById('inpTarifaKm');
+                    if (i1 && !document.activeElement.isSameNode(i1)) i1.value = tarifasActualesLince.valorHoraCustodio || '';
+                    if (i2 && !document.activeElement.isSameNode(i2)) i2.value = tarifasActualesLince.valorHoraCliente || '';
+                    if (i3 && !document.activeElement.isSameNode(i3)) i3.value = tarifasActualesLince.valorKm || '';
+                }
+                if (document.getElementById('modalRadarDespacho').style.display === 'block') {
+                    renderizarRadarYDespachos();
+                }
+            }
+        } catch (e) {}
+    };
+
+    // Extender Guardado de Hoja de Ruta para grabar GPS Inicio, GPS Fin y Fotos de Comprobantes
+    const _guardarHojaOrig2 = guardarHojaDeRuta;
+    guardarHojaDeRuta = async function() {
+        // Sellar las horas bajo la regla del mínimo de 4 hs si no es Admin editando a mano
+        if (!esRolAdmin()) {
+            calcularHorasExcedentes();
+        }
+        await _guardarHojaOrig2();
+
+        // Asociar GPS Inicio, GPS Fin y Fotos a la hoja recién guardada en el tope del historial
+        try {
+            let historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
+            if (historial.length > 0) {
+                historial[0].gpsInicio = gpsInicioActual || gpsVivoActual || null;
+                historial[0].gpsFin = gpsVivoActual || gpsInicioActual || null;
+                historial[0].fotosComprobantes = fotosComprobantesActuales.slice();
+                if (idDespachoCargadoActual) {
+                    historial[0].idDespachoOrigen = idDespachoCargadoActual;
+                }
+                guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(historial));
+            }
+        } catch (e) {}
+
+        // Reiniciar fotos y GPS de inicio para la próxima hoja
+        fotosComprobantesActuales = [];
+        gpsInicioActual = null;
+        idDespachoCargadoActual = null;
+        try { localStorage.removeItem('gpsInicioBorradorLince'); } catch (e) {}
+        renderizarGaleriaFotosComprobantes();
+        mostrarHistorial();
+    };
+
+    // Inicializar al cargar
+    inyectarControlesNuevosEnDOM();
+    if (usuarioActivo) {
+        aplicarBloqueoEdicionHorasExcedentes();
+        verificarSiRequiereCambioClave();
+        iniciarRastreoGpsContinuo();
+    }
+</script>
 </body>
 </html>
