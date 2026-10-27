@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Custodia Lince">
-    <link rel="manifest" id="manifestDinamico">
+    <link rel="manifest" href="manifest.json">
     <title>Hoja de Ruta - Servicio de Custodia Lince</title>
     <!-- Librería oficial jsPDF para generar el archivo .PDF estándar nativo -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -930,7 +930,6 @@
     <div class="info-sesion">
         <span>👤 USUARIO: <span id="lblNombreUsuario">-</span></span>
         <span id="lblRolUsuario" class="badge-rol">ROL</span>
-        <span id="lblEstadoConexion" class="badge-conexion">🟢 EN VIVO (TIEMPO REAL)</span>
     </div>
     <div class="botones-sesion">
         <button type="button" id="btnControlHoras" class="btn-top-3d btn-control-horas" style="display: none;" onclick="abrirModalEstadisticas()">
@@ -948,19 +947,13 @@
         <button type="button" id="btnConfigNube" class="btn-top-3d btn-nube-admin" style="display: none;" onclick="abrirModalNube()">
             ☁️ DRIVE ACTIVO
         </button>
-        <button type="button" id="btnInstalarAppBarra" class="btn-top-3d btn-instalar-top" onclick="ejecutarInstalacionApp()">
+        <button type="button" id="btnInstalarAppBarra" class="btn-top-3d btn-instalar-top" style="display: none;" onclick="ejecutarInstalacionApp()">
             📲 INSTALAR APP
         </button>
         <button type="button" class="btn-top-3d btn-salir" onclick="cerrarSesion()">
             🔒 CAMBIAR USUARIO
         </button>
     </div>
-</div>
-
-<!-- BARRA DE BORRADOR AUTOMÁTICO EN VIVO + COLA OFFLINE -->
-<div class="barra-estado-borrador">
-    <span id="lblEstadoBorrador">💾 BORRADOR AUTOMÁTICO ACTIVO: Todo lo que escribas queda guardado aunque se apague o cierre el celular.</span>
-    <span id="lblColaOffline" style="color: #b45309; display: none;">⏳ HOJAS PENDIENTES DE SEÑAL: 0</span>
 </div>
 
 <div id="mensajeExito" class="alerta-guardado">
@@ -1657,100 +1650,95 @@
 
     // =========================================================
     // =========================================================
+    // =========================================================
     // 0.B SISTEMA DE INSTALACIÓN DE APP Y MEMORIA OFFLINE (PWA + SERVICE WORKER)
     // =========================================================
     let eventoInstalacionPWA = null;
 
     function estaInstaladaEnPantalla() {
-        return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-               window.navigator.standalone === true;
+        const yaMarcada = leerStorageSeguro('appLinceInstaladaPermanente', '') === 'true';
+        const porUrl = window.location.search.includes('modo=app');
+        const porPantalla = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+                            window.navigator.standalone === true;
+        if (porUrl || porPantalla) {
+            guardarStorageSeguro('appLinceInstaladaPermanente', 'true');
+            return true;
+        }
+        return yaMarcada;
+    }
+
+    function ocultarTodoRastroInstalacion() {
+        const banner = document.getElementById('bannerInstalarApp');
+        const btnBarra = document.getElementById('btnInstalarAppBarra');
+        if (banner) banner.style.display = 'none';
+        if (btnBarra) btnBarra.style.display = 'none';
     }
 
     function inicializarPWAInstalable() {
-        // Registrar el motor offline (sw.js) para que nunca salga pantalla negra sin señal
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
             navigator.serviceWorker.register('./sw.js').catch(() => {});
         }
 
-        try {
-            const iconoUrl = new URL('Sin título (1).jpg', window.location.href).href;
-            const manifestObj = {
-                name: "Custodia Lince - Hoja de Ruta",
-                short_name: "Custodia Lince",
-                description: "Sistema Oficial de Hoja de Ruta - Lince Seguridad",
-                start_url: window.location.href.split('?')[0],
-                scope: "./",
-                display: "standalone",
-                background_color: "#143627",
-                theme_color: "#143627",
-                icons: [
-                    { src: iconoUrl, sizes: "192x192", type: "image/jpeg" },
-                    { src: iconoUrl, sizes: "512x512", type: "image/jpeg" }
-                ]
-            };
-            const blobManifest = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
-            const linkManifest = document.getElementById('manifestDinamico');
-            if (linkManifest) {
-                linkManifest.href = URL.createObjectURL(blobManifest);
-            }
-        } catch (e) {}
+        if (estaInstaladaEnPantalla()) {
+            ocultarTodoRastroInstalacion();
+            return;
+        }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
+            if (estaInstaladaEnPantalla()) {
+                ocultarTodoRastroInstalacion();
+                return;
+            }
             eventoInstalacionPWA = e;
-            if (usuarioActivo && !estaInstaladaEnPantalla()) {
+            const btnBarra = document.getElementById('btnInstalarAppBarra');
+            if (btnBarra) btnBarra.style.display = 'inline-block';
+            if (usuarioActivo && leerStorageSeguro('bannerPwaCerradoPermanente', '') !== 'true') {
                 mostrarNotificacionInstalarApp();
             }
         });
 
         window.addEventListener('appinstalled', () => {
             eventoInstalacionPWA = null;
-            const banner = document.getElementById('bannerInstalarApp');
-            const btnBarra = document.getElementById('btnInstalarAppBarra');
-            if (banner) banner.style.display = 'none';
-            if (btnBarra) btnBarra.style.display = 'none';
+            guardarStorageSeguro('appLinceInstaladaPermanente', 'true');
+            guardarStorageSeguro('bannerPwaCerradoPermanente', 'true');
+            ocultarTodoRastroInstalacion();
         });
     }
 
     function mostrarNotificacionInstalarApp() {
-        if (estaInstaladaEnPantalla()) {
-            const btnBarra = document.getElementById('btnInstalarAppBarra');
-            if (btnBarra) btnBarra.style.display = 'none';
+        // Solo muestra el aviso si el instalador automático real está listo y nunca fue instalada ni cerrada
+        if (estaInstaladaEnPantalla() || !eventoInstalacionPWA) {
+            ocultarTodoRastroInstalacion();
             return;
         }
-        if (leerSesionSegura('bannerPwaCerrado') === 'true') return;
+        if (leerStorageSeguro('bannerPwaCerradoPermanente', '') === 'true') return;
         const banner = document.getElementById('bannerInstalarApp');
-        if (banner) {
-            banner.style.display = 'flex';
-        }
+        if (banner) banner.style.display = 'flex';
     }
 
     function cerrarBannerInstalacion() {
-        guardarSesionSegura('bannerPwaCerrado', 'true');
+        // Guarda en memoria permanente para que NO vuelva a aparecer cada vez que ingresás
+        guardarStorageSeguro('bannerPwaCerradoPermanente', 'true');
         const banner = document.getElementById('bannerInstalarApp');
         if (banner) banner.style.display = 'none';
     }
 
     async function ejecutarInstalacionApp() {
-        if (eventoInstalacionPWA) {
-            eventoInstalacionPWA.prompt();
-            try {
-                const resultado = await eventoInstalacionPWA.userChoice;
-                if (resultado && resultado.outcome === 'accepted') {
-                    cerrarBannerInstalacion();
-                }
-            } catch (e) {}
-            eventoInstalacionPWA = null;
+        if (!eventoInstalacionPWA) {
+            ocultarTodoRastroInstalacion();
             return;
         }
-
-        const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        if (esIOS) {
-            alert('📲 PARA AGREGAR LA APP A TU PANTALLA EN IPHONE:\n\n1. Tocá el botón "Compartir" (el cuadradito con la flecha hacia arriba abajo en Safari).\n2. Elegí "Agregar a inicio" (Add to Home Screen).\n3. Tocá "Agregar" arriba a la derecha.');
-        } else {
-            alert('📲 PARA AGREGAR LA APP AL MENÚ DE TU CELULAR:\n\n1. Tocá los 3 puntitos (⋮) arriba a la derecha en tu navegador Chrome.\n2. Elegí "Agregar a la pantalla principal" o "Instalar aplicación".\n3. Confirmá tocando "Instalar" o "Agregar".');
-        }
-        cerrarBannerInstalacion();
+        try {
+            eventoInstalacionPWA.prompt();
+            const resultado = await eventoInstalacionPWA.userChoice;
+            if (resultado && resultado.outcome === 'accepted') {
+                guardarStorageSeguro('appLinceInstaladaPermanente', 'true');
+                guardarStorageSeguro('bannerPwaCerradoPermanente', 'true');
+                ocultarTodoRastroInstalacion();
+            }
+        } catch (e) {}
+        eventoInstalacionPWA = null;
     }
 
     // =========================================================
@@ -2328,7 +2316,7 @@
         const btnInstalarBarra = document.getElementById('btnInstalarAppBarra');
 
         if (btnInstalarBarra) {
-            btnInstalarBarra.style.display = estaInstaladaEnPantalla() ? 'none' : 'inline-block';
+            btnInstalarBarra.style.display = (!estaInstaladaEnPantalla() && eventoInstalacionPWA) ? 'inline-block' : 'none';
         }
 
         actualizarDatalistsCustodios();
