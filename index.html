@@ -953,8 +953,8 @@
         <button type="button" id="btnInstalarAppBarra" class="btn-top-3d btn-instalar-top" style="display: none;" onclick="ejecutarInstalacionApp()">
             📲 INSTALAR APP
         </button>
-        <button type="button" class="btn-top-3d btn-salir" onclick="cerrarSesion()">
-            🔒 CAMBIAR USUARIO
+        <button type="button" id="btnCerrarSesionTop" class="btn-top-3d btn-salir" style="background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%); box-shadow: 0 4px 0 #450a0a;" onclick="cerrarSesion()">
+            🔴 CERRAR SESIÓN
         </button>
     </div>
 </div>
@@ -4951,39 +4951,129 @@
     }
 
     // =========================================================
-    // C. GPS SIEMPRE ACTIVO (EN VIVO CONTINUO + PUNTO DE INICIO Y FIN)
+    // C. GPS SIEMPRE ACTIVO EN 1° Y 2° PLANO (DESDE LOGIN HASTA CERRAR SESIÓN)
     // =========================================================
+    let workerSegundoPlanoGps = null;
+    let wakeLockPantallaGps = null;
+
     function formatearLinkMaps(gpsObj) {
         if (!gpsObj || !gpsObj.lat || !gpsObj.lng) return '';
         return `https://www.google.com/maps?q=${gpsObj.lat},${gpsObj.lng}`;
     }
 
+    function formatearTextoCoordenada(gpsObj) {
+        if (!gpsObj || !gpsObj.lat || !gpsObj.lng) return '';
+        return `${gpsObj.lat}, ${gpsObj.lng}${gpsObj.hora ? ' (' + gpsObj.hora + ')' : ''}`;
+    }
+
+    // Mantiene el procesador del celular despierto en segundo plano mientras la sesión esté abierta
+    async function activarWakeLockSegundoPlano() {
+        if ('wakeLock' in navigator && usuarioActivo) {
+            try {
+                if (!wakeLockPantallaGps) {
+                    wakeLockPantallaGps = await navigator.wakeLock.request('screen');
+                    wakeLockPantallaGps.addEventListener('release', () => {
+                        wakeLockPantallaGps = null;
+                    });
+                }
+            } catch (e) {}
+        }
+    }
+
+    function liberarWakeLockSegundoPlano() {
+        if (wakeLockPantallaGps) {
+            try { wakeLockPantallaGps.release(); } catch (e) {}
+            wakeLockPantallaGps = null;
+        }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (usuarioActivo) {
+            if (document.visibilityState === 'visible') {
+                activarWakeLockSegundoPlano();
+            }
+            forzarLecturaYEnvioGps('ACTIVO EN SERVICIO', true);
+        }
+    });
+
+    function iniciarWorkerSegundoPlano() {
+        if (workerSegundoPlanoGps) return;
+        try {
+            const codigoWorker = `
+                let timer = null;
+                self.onmessage = function(e) {
+                    if (e.data === 'START') {
+                        if (timer) clearInterval(timer);
+                        timer = setInterval(() => self.postMessage('TICK_GPS'), 12000);
+                    } else if (e.data === 'STOP') {
+                        if (timer) clearInterval(timer);
+                        timer = null;
+                    }
+                };
+            `;
+            const blob = new Blob([codigoWorker], { type: 'application/javascript' });
+            workerSegundoPlanoGps = new Worker(URL.createObjectURL(blob));
+            workerSegundoPlanoGps.onmessage = function(e) {
+                if (e.data === 'TICK_GPS' && usuarioActivo) {
+                    forzarLecturaYEnvioGps('ACTIVO EN SERVICIO', false);
+                }
+            };
+            workerSegundoPlanoGps.postMessage('START');
+        } catch (e) {}
+    }
+
+    function detenerWorkerSegundoPlano() {
+        if (workerSegundoPlanoGps) {
+            try {
+                workerSegundoPlanoGps.postMessage('STOP');
+                workerSegundoPlanoGps.terminate();
+            } catch (e) {}
+            workerSegundoPlanoGps = null;
+        }
+    }
+
     function iniciarRastreoGpsContinuo() {
-        if (!('geolocation' in navigator)) return;
+        if (!usuarioActivo || !('geolocation' in navigator)) return;
 
-        navigator.geolocation.getCurrentPosition((pos) => {
-            registrarCoordenadaRecibida(pos);
-        }, () => {}, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+        activarWakeLockSegundoPlano();
+        iniciarWorkerSegundoPlano();
 
+        // 1. Captura inmediata apenas inicia sesión
+        forzarLecturaYEnvioGps('ACTIVO EN SERVICIO', true);
+
+        // 2. Rastreador permanente de movimiento
         if (watchIdGpsLince !== null) {
             navigator.geolocation.clearWatch(watchIdGpsLince);
         }
         watchIdGpsLince = navigator.geolocation.watchPosition((pos) => {
-            registrarCoordenadaRecibida(pos);
-        }, () => {}, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+            registrarCoordenadaRecibida(pos, 'ACTIVO EN SERVICIO', false);
+        }, () => {}, { enableHighAccuracy: true, maximumAge: 4000, timeout: 15000 });
     }
 
-    function registrarCoordenadaRecibida(pos) {
+    function forzarLecturaYEnvioGps(estadoTexto = 'ACTIVO EN SERVICIO', forzarEnvioInmediato = false) {
+        if (!('geolocation' in navigator) || !usuarioActivo) return;
+        navigator.geolocation.getCurrentPosition((pos) => {
+            registrarCoordenadaRecibida(pos, estadoTexto, forzarEnvioInmediato);
+        }, () => {
+            if (gpsVivoActual && forzarEnvioInmediato) {
+                enviarUbicacionGpsANube(gpsVivoActual, estadoTexto, true);
+            }
+        }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 });
+    }
+
+    function registrarCoordenadaRecibida(pos, estadoTexto = 'ACTIVO EN SERVICIO', forzarEnvio = false) {
         if (!pos || !pos.coords) return;
         const punto = {
             lat: Number(pos.coords.latitude.toFixed(6)),
             lng: Number(pos.coords.longitude.toFixed(6)),
             precision: Math.round(pos.coords.accuracy || 0),
-            hora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+            hora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
             fechaHora: new Date().toLocaleString('es-AR')
         };
         gpsVivoActual = punto;
+        guardarStorageSeguro('ultimaCoordenadaConocidaLince', JSON.stringify(punto));
 
+        // Si es la primera coordenada de la hoja actual, queda sellada como GPS INICIO
         const guardadoPrevio = leerStorageSeguro('gpsInicioBorradorLince', '');
         if (!guardadoPrevio) {
             gpsInicioActual = punto;
@@ -4992,26 +5082,86 @@
             try { gpsInicioActual = JSON.parse(guardadoPrevio); } catch (e) { gpsInicioActual = punto; }
         }
 
+        enviarUbicacionGpsANube(punto, estadoTexto, forzarEnvio);
+    }
+
+    async function enviarUbicacionGpsANube(punto, estadoTexto = 'ACTIVO EN SERVICIO', forzarEnvio = false) {
+        if (!usuarioActivo || !punto) return;
         const ahoraMs = Date.now();
-        if (usuarioActivo && navigator.onLine && (ahoraMs - ultimoEnvioGpsNubeMs > 20000)) {
-            ultimoEnvioGpsNubeMs = ahoraMs;
-            const numH = (document.getElementById('numHojaRuta') || {}).value || '';
-            const cliH = (document.getElementById('clientePredeterminado') || {}).value || '';
-            enviarAccionPostNube({
+        if (!forzarEnvio && (ahoraMs - ultimoEnvioGpsNubeMs < 11000)) return;
+        ultimoEnvioGpsNubeMs = ahoraMs;
+
+        const numH = (document.getElementById('numHojaRuta') || {}).value || '';
+        const cliH = (document.getElementById('clientePredeterminado') || {}).value || '';
+        const paqueteUbicacion = {
+            username: usuarioActivo.username,
+            nombreCompleto: usuarioActivo.nombreCompleto || usuarioActivo.username,
+            lat: punto.lat,
+            lng: punto.lng,
+            fechaHora: punto.fechaHora,
+            numHojaActual: numH,
+            clienteActual: cliH,
+            estadoSesion: estadoTexto
+        };
+
+        if (navigator.onLine) {
+            await enviarAccionPostNube({
                 accion: 'reportarGpsVivo',
                 username: usuarioActivo.username,
-                ubicacion: {
-                    username: usuarioActivo.username,
-                    nombreCompleto: usuarioActivo.nombreCompleto || usuarioActivo.username,
-                    lat: punto.lat,
-                    lng: punto.lng,
-                    fechaHora: punto.fechaHora,
-                    numHojaActual: numH,
-                    clienteActual: cliH
-                }
+                ubicacion: paqueteUbicacion
             });
+        } else {
+            guardarStorageSeguro('gpsPendienteOfflineLince', JSON.stringify(paqueteUbicacion));
         }
     }
+
+    // Apaga el GPS únicamente cuando el custodio toca CERRAR SESIÓN
+    async function detenerRastreoGpsPorCierreSesion() {
+        if (watchIdGpsLince !== null && 'geolocation' in navigator) {
+            navigator.geolocation.clearWatch(watchIdGpsLince);
+            watchIdGpsLince = null;
+        }
+        detenerWorkerSegundoPlano();
+        liberarWakeLockSegundoPlano();
+
+        let puntoFinal = gpsVivoActual;
+        if (!puntoFinal) {
+            try { puntoFinal = JSON.parse(leerStorageSeguro('ultimaCoordenadaConocidaLince', 'null')); } catch (e) {}
+        }
+        if (usuarioActivo && puntoFinal) {
+            puntoFinal.fechaHora = new Date().toLocaleString('es-AR');
+            await enviarUbicacionGpsANube(puntoFinal, '🔴 SESIÓN CERRADA', true);
+        }
+    }
+
+    // Vincular inicio y cierre de sesión para mantener la sesión viva en 2do plano hasta tocar CERRAR SESIÓN
+    const _iniciarSesionBaseGps = iniciarSesion;
+    iniciarSesion = async function() {
+        await _iniciarSesionBaseGps();
+        if (usuarioActivo) {
+            guardarStorageSeguro('sesionPermanenteActivaLince', JSON.stringify(usuarioActivo));
+            ultimoEnvioGpsNubeMs = 0;
+            iniciarRastreoGpsContinuo();
+        }
+    };
+
+    cerrarSesion = async function() {
+        if (!confirm('¿SEGURO QUE QUERÉS CERRAR SESIÓN?\n\nSe guardará tu borrador actual y se desactivará el GPS hasta que vuelvas a ingresar.')) {
+            return;
+        }
+        guardarBorradorEnVivo();
+        await detenerRastreoGpsPorCierreSesion();
+        usuarioActivo = null;
+        borrarSesionSegura('sesionActivaLince');
+        try { localStorage.removeItem('sesionPermanenteActivaLince'); } catch (e) {}
+        delete memoriaRespaldoRAM['sesionPermanenteActivaLince'];
+
+        document.getElementById('loginUsuario').value = '';
+        document.getElementById('loginClave').value = '';
+        document.getElementById('errorLogin').style.display = 'none';
+        document.getElementById('pantallaLogin').style.display = 'flex';
+        sincronizarUsuariosDesdeNube();
+    };
 
     // =========================================================
     // D. CAMBIO DE CLAVE PERSONAL OBLIGATORIO POR ÚNICA VEZ
@@ -5739,19 +5889,29 @@
             if (listaUbi.length === 0) {
                 tbodyRadar.innerHTML = '<tr><td colspan="5" style="text-align:center;">NO HAY CUSTODIOS TRANSMITIENDO GPS EN ESTE MOMENTO</td></tr>';
             } else {
-                tbodyRadar.innerHTML = listaUbi.map(u => `
+                tbodyRadar.innerHTML = listaUbi.map(u => {
+                    const cerrada = String(u.estadoSesion || '').includes('CERRADA');
+                    const badgeEstado = cerrada
+                        ? `<span style="background:#fee2e2; color:#991b1b; border:1px solid #f87171; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">🔴 SESIÓN CERRADA</span>`
+                        : `<span style="background:#dcfce7; color:#166534; border:1px solid #86efac; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">🟢 ACTIVO EN SERVICIO</span>`;
+
+                    return `
                     <tr>
-                        <td style="font-weight:bold; color:#143627;">🟢 ${u.nombreCompleto || u.username}</td>
+                        <td style="font-weight:bold; color:#143627;">
+                            <div>${u.nombreCompleto || u.username}</div>
+                            <div style="margin-top:3px;">${badgeEstado}</div>
+                        </td>
                         <td style="text-align:center; font-weight:bold;">${u.numHojaActual || '-'} (${u.clienteActual || '-'})</td>
                         <td style="text-align:center;">🕒 ${u.fechaHora || '-'}</td>
-                        <td style="text-align:center; font-size:11px;">${u.lat}, ${u.lng}</td>
+                        <td style="text-align:center; font-size:11px; font-weight:bold;">${u.lat}, ${u.lng}</td>
                         <td style="text-align:center;">
                             <a href="https://www.google.com/maps?q=${u.lat},${u.lng}" target="_blank" class="btn-accion-chico btn-cargar" style="text-decoration:none; display:inline-block; width:auto; padding:6px 10px;">
                                 🗺️ VER EN MAPA
                             </a>
                         </td>
                     </tr>
-                `).join('');
+                    `;
+                }).join('');
             }
         }
 
@@ -5996,6 +6156,7 @@
     };
 
     // Mostrar AUXILIAR 2 y enlaces de GPS Inicio/Fin en la tabla de Historial
+    // Mostrar Coordenadas exactas + botón de Mapa de GPS INICIO y GPS FIN en el Historial
     const _mostrarHistorialBase = mostrarHistorial;
     mostrarHistorial = function() {
         _mostrarHistorialBase();
@@ -6007,22 +6168,22 @@
             const fila = filas[idx];
             if (!fila || !fila.cells || fila.cells.length < 6) return;
 
-            // Agregar GPS Inicio y Fin en columna Fecha
             const celdaFecha = fila.cells[1];
             if (celdaFecha && !celdaFecha.querySelector('.links-gps-historial')) {
                 const divGps = document.createElement('div');
                 divGps.className = 'links-gps-historial';
-                divGps.style.marginTop = '4px';
+                divGps.style.marginTop = '5px';
                 const linkIni = formatearLinkMaps(item.gpsInicio);
                 const linkFin = formatearLinkMaps(item.gpsFin);
+                const coordIni = formatearTextoCoordenada(item.gpsInicio);
+                const coordFin = formatearTextoCoordenada(item.gpsFin);
                 divGps.innerHTML = `
-                    ${linkIni ? `<a href="${linkIni}" target="_blank" style="font-size:10px; font-weight:bold; color:#15803d; text-decoration:none; margin-right:6px;">📍 GPS INICIO</a>` : ''}
-                    ${linkFin ? `<a href="${linkFin}" target="_blank" style="font-size:10px; font-weight:bold; color:#1d4ed8; text-decoration:none;">🏁 GPS FIN</a>` : ''}
+                    ${linkIni ? `<div style="margin-top:3px;"><a href="${linkIni}" target="_blank" style="font-size:10px; font-weight:bold; color:#15803d; text-decoration:underline;">📍 INICIO: ${coordIni}</a></div>` : ''}
+                    ${linkFin ? `<div style="margin-top:3px;"><a href="${linkFin}" target="_blank" style="font-size:10px; font-weight:bold; color:#1d4ed8; text-decoration:underline;">🏁 FIN (AL GUARDAR): ${coordFin}</a></div>` : ''}
                 `;
                 celdaFecha.appendChild(divGps);
             }
 
-            // Mostrar AUX 2 si fue cargado en la hoja
             const celdaCustodios = fila.cells[4];
             if (celdaCustodios && (item.nombreAux2 || item.cunAux2) && !celdaCustodios.innerHTML.includes('AUX 2:')) {
                 const divAux2 = document.createElement('div');
@@ -6110,7 +6271,6 @@
             kpiMinutosExc += Math.max(minExcJjee, minExcAux1, minExcAux2);
             kpiKilometros += kmHoja;
 
-            // 1. Sumar a JJEE
             const nomJjee = h.nombreJjee || h.creadoPor || '';
             if (nomJjee) {
                 const regJ = obtenerORegistrarCustodio(nomJjee, h.cuitJjee);
@@ -6123,7 +6283,6 @@
                 }
             }
 
-            // 2. Sumar a AUXILIAR 1
             if (h.nombreAux || h.cunAux) {
                 const regA1 = obtenerORegistrarCustodio(h.nombreAux || h.cunAux, h.cunAux);
                 if (regA1) {
@@ -6135,7 +6294,6 @@
                 }
             }
 
-            // 3. Sumar a AUXILIAR 2
             if (h.nombreAux2 || h.cunAux2) {
                 const regA2 = obtenerORegistrarCustodio(h.nombreAux2 || h.cunAux2, h.cunAux2);
                 if (regA2) {
@@ -6147,7 +6305,6 @@
                 }
             }
 
-            // 4. Sumar por Cliente
             const nomCli = String(h.cliente || 'EDESUR S.A').trim().toUpperCase();
             if (!mapaClientes.has(nomCli)) {
                 mapaClientes.set(nomCli, { cliente: nomCli, servicios: 0, minutosTotales: 0, minutosExc: 0, kilometros: 0 });
@@ -6203,7 +6360,6 @@
         }
     };
 
-    // Exportación a Excel actualizada con AUXILIAR 2, AUX 2 HORAS EXC. y Links GPS Inicio / Fin
     exportarHistorialAExcel = function() {
         if (!esRolAdminOColaborador()) {
             alert('SOLO EL ADMINISTRADOR O COLABORADOR PUEDE EXPORTAR EL REPORTE A EXCEL.');
@@ -6246,8 +6402,10 @@
             'REMITO N°',
             'MÓDULO',
             'PEAJES',
-            'GPS INICIO (GOOGLE MAPS)',
-            'GPS FIN (GOOGLE MAPS)',
+            'COORDENADAS INICIO',
+            'MAPA GPS INICIO',
+            'COORDENADAS FIN (AL GUARDAR)',
+            'MAPA GPS FIN',
             'RESPONSABLE FIRMA',
             'DNI RESPONSABLE FIRMA',
             'OBSERVACIONES'
@@ -6288,7 +6446,9 @@
                 item.remito || '',
                 item.modulo || '',
                 item.peajes || '',
+                formatearTextoCoordenada(item.gpsInicio),
                 formatearLinkMaps(item.gpsInicio),
+                formatearTextoCoordenada(item.gpsFin),
                 formatearLinkMaps(item.gpsFin),
                 item.firmaApellidoNombre || '',
                 item.firmaDni || '',
@@ -6311,6 +6471,18 @@
 
     const _sincronizarEstadoOrig = sincronizarEstadoCompletoConNube;
     sincronizarEstadoCompletoConNube = async function(subirLocal = false, forzarRedibujado = false) {
+        // Si había un ping de GPS guardado offline, lo sube apenas vuelve la señal
+        if (navigator.onLine) {
+            const gpsPend = leerStorageSeguro('gpsPendienteOfflineLince', '');
+            if (gpsPend) {
+                try {
+                    const objGps = JSON.parse(gpsPend);
+                    localStorage.removeItem('gpsPendienteOfflineLince');
+                    await enviarAccionPostNube({ accion: 'reportarGpsVivo', username: objGps.username, ubicacion: objGps });
+                } catch (e) {}
+            }
+        }
+
         await _sincronizarEstadoOrig(subirLocal, forzarRedibujado);
         if (!navigator.onLine) return;
         try {
@@ -6341,37 +6513,163 @@
         } catch (e) {}
     };
 
-    const _guardarHojaOrig2 = guardarHojaDeRuta;
+    // Guardado de Hoja de Ruta que sella GPS INICIO y GPS FIN antes de subir a la nube
     guardarHojaDeRuta = async function() {
         if (!esRolAdmin()) {
             calcularHorasExcedentes();
         }
-        await _guardarHojaOrig2();
+
+        const d = {};
+        document.querySelectorAll('[data-campo]').forEach(el => {
+            d[el.getAttribute('data-campo')] = (el.value || '').trim().toUpperCase();
+        });
+
+        if (!d.nombreJjee) {
+            alert('⚠️ FALTA COMPLETAR EL NOMBRE O DNI DEL CUSTODIO (JJEE).');
+            document.getElementById('inputCuitJjee').focus();
+            return;
+        }
+        if (!d.horaFinalizacion || !hayFirmaDibujada) {
+            const faltantes = [];
+            if (!d.horaFinalizacion) faltantes.push('HORA DE FINALIZACIÓN');
+            if (!hayFirmaDibujada) faltantes.push('FIRMA DEL RESPONSABLE');
+            const conf = confirm(`⚠️ ATENCIÓN: Todavía falta completar: ${faltantes.join(' y ')}.\n\nRecordá que NO hace falta tocar "GUARDAR" para mantener el precargado (el borrador ya se guarda solo).\n\n¿Seguro que querés CERRAR Y ENVIAR esta Hoja de Ruta ahora?`);
+            if (!conf) return;
+        }
+
+        const btnGuardar = document.getElementById('btnGuardar');
+        btnGuardar.disabled = true;
+        btnGuardar.innerText = 'TOMANDO COORDENADAS FINALES Y GUARDANDO...';
 
         try {
-            let historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
-            if (historial.length > 0) {
-                historial[0].gpsInicio = gpsInicioActual || gpsVivoActual || null;
-                historial[0].gpsFin = gpsVivoActual || gpsInicioActual || null;
-                historial[0].fotosComprobantes = fotosComprobantesActuales.slice();
-                if (idDespachoCargadoActual) {
-                    historial[0].idDespachoOrigen = idDespachoCargadoActual;
-                    despachosNube = (despachosNube || []).filter(x => String(x.idDespacho) !== String(idDespachoCargadoActual));
-                    guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
-                }
-                guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(historial));
+            // 1. Capturar coordenada GPS exacta del momento en que finaliza y guarda la Hoja de Ruta
+            if ('geolocation' in navigator) {
+                await new Promise((resolve) => {
+                    navigator.geolocation.getCurrentPosition((pos) => {
+                        registrarCoordenadaRecibida(pos, 'ACTIVO EN SERVICIO', true);
+                        resolve();
+                    }, () => resolve(), { enableHighAccuracy: true, timeout: 3500, maximumAge: 0 });
+                });
             }
-        } catch (e) {}
 
-        fotosComprobantesActuales = [];
-        gpsInicioActual = null;
-        idDespachoCargadoActual = null;
-        try { localStorage.removeItem('gpsInicioBorradorLince'); } catch (e) {}
-        renderizarGaleriaFotosComprobantes();
-        mostrarHistorial();
+            let ultimaConocida = gpsVivoActual;
+            if (!ultimaConocida) {
+                try { ultimaConocida = JSON.parse(leerStorageSeguro('ultimaCoordenadaConocidaLince', 'null')); } catch (e) {}
+            }
+
+            const numEnPantalla = parseInt(d.numHoja || '0', 10) || 0;
+            const numAsignadoNube = await reservarNumeroUnicoEnNube(numEnPantalla);
+            if (numAsignadoNube) {
+                d.numHoja = numAsignadoNube;
+            } else {
+                avanzarContadorHojaDeRuta();
+            }
+
+            d.firma = hayFirmaDibujada ? canvas.toDataURL('image/png') : '';
+            d.id = Date.now();
+            d.creadoPor = usuarioActivo ? usuarioActivo.username : 'ADMIN';
+            d.fechaHoraCargaReal = new Date().toLocaleString('es-AR');
+            d.subidoADrive = false;
+            d.gpsInicio = gpsInicioActual || ultimaConocida || null;
+            d.gpsFin = ultimaConocida || gpsInicioActual || null;
+            d.fotosComprobantes = fotosComprobantesActuales.slice();
+
+            if (idDespachoCargadoActual) {
+                d.idDespachoOrigen = idDespachoCargadoActual;
+                despachosNube = (despachosNube || []).filter(x => String(x.idDespacho) !== String(idDespachoCargadoActual));
+                guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
+            }
+
+            let historial = [];
+            try {
+                historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
+                if (!Array.isArray(historial)) historial = [];
+            } catch (e) { historial = []; }
+            historial.unshift(d);
+            guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(historial));
+
+            borrarBorradorEnVivoActual();
+            fotosComprobantesActuales = [];
+            gpsInicioActual = null;
+            idDespachoCargadoActual = null;
+            try { localStorage.removeItem('gpsInicioBorradorLince'); } catch (e) {}
+            renderizarGaleriaFotosComprobantes();
+
+            document.querySelectorAll('[data-campo]').forEach(i => {
+                const c = i.getAttribute('data-campo');
+                if (c !== 'numHoja' && c !== 'cliente' && c !== 'fecha') {
+                    i.value = '';
+                    i.classList.remove('campo-auto');
+                }
+            });
+            document.getElementById('clientePredeterminado').value = 'EDESUR S.A';
+            document.getElementById('fechaServicio').value = new Date().toISOString().split('T')[0];
+
+            if (usuarioActivo && !esRolAdminOColaborador()) {
+                const inpNomJjee = document.getElementById('inputNombreJjee');
+                const inpCuitJjee = document.getElementById('inputCuitJjee');
+                if (inpNomJjee) inpNomJjee.value = (usuarioActivo.nombreCompleto || usuarioActivo.username).toUpperCase();
+                if (inpCuitJjee && usuarioActivo.cuitDni) inpCuitJjee.value = usuarioActivo.cuitDni.toUpperCase();
+            }
+
+            limpiarFirma();
+            mostrarHistorial();
+
+            let anio = new Date().getFullYear();
+            let mesIndex = new Date().getMonth();
+            if (d.fecha && d.fecha.includes('-')) {
+                const partes = d.fecha.split('-');
+                if (partes.length === 3) {
+                    anio = parseInt(partes[0], 10) || anio;
+                    mesIndex = (parseInt(partes[1], 10) - 1);
+                }
+            }
+            const nombreCarpetaAnio = `Año ${anio}`;
+            const nombreCarpetaMes = NOMBRES_MESES[mesIndex] || 'Octubre';
+
+            const alerta = document.getElementById('mensajeExito');
+            if (navigator.onLine) {
+                alerta.style.backgroundColor = '#16a34a';
+                alerta.innerText = `¡HOJA DE RUTA N° ${d.numHoja} GUARDADA CON COORDENADAS GPS Y ENVIÁNDOSE A GOOGLE DRIVE!`;
+            } else {
+                alerta.style.backgroundColor = '#d97706';
+                alerta.innerText = `🟠 SIN SEÑAL: HOJA N° ${d.numHoja} Y COORDENADAS GUARDADAS EN CELULAR. SE SUBIRÁN SOLAS AL VOLVER LA RED.`;
+            }
+            alerta.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => { alerta.style.display = 'none'; }, 4500);
+
+            (async () => {
+                const enviadoOk = await enviarACarpetasAutomaticasEnNube(d, obtenerUrlActivaNube(), nombreCarpetaAnio, nombreCarpetaMes);
+                if (enviadoOk) {
+                    marcarHojaComoSubidaEnHistorialLocal(d.id);
+                    mostrarHistorial();
+                    await sincronizarEstadoCompletoConNube(true, true);
+                } else {
+                    const cola = obtenerColaOffline();
+                    cola.push({ datosHoja: d, nombreCarpetaAnio, nombreCarpetaMes });
+                    guardarColaOffline(cola);
+                    mostrarHistorial();
+                }
+            })();
+        } finally {
+            btnGuardar.disabled = false;
+            btnGuardar.innerText = 'GUARDAR HOJA DE RUTA';
+        }
     };
 
+    // Restaurar sesión permanente si el custodio no tocó CERRAR SESIÓN
     inyectarControlesNuevosEnDOM();
+    if (!usuarioActivo) {
+        const sesionPerm = leerStorageSeguro('sesionPermanenteActivaLince', '');
+        if (sesionPerm) {
+            try {
+                usuarioActivo = JSON.parse(sesionPerm);
+                guardarSesionSegura('sesionActivaLince', sesionPerm);
+                aplicarInterfazPorUsuario();
+            } catch (e) {}
+        }
+    }
     if (usuarioActivo) {
         aplicarBloqueoEdicionHorasExcedentes();
         verificarSiRequiereCambioClave();
