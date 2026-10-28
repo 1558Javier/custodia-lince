@@ -4760,7 +4760,7 @@
 
 <script id="superMejorasCorporativasLince">
     // =========================================================
-    // A. INYECCIÓN AUTOMÁTICA DE CONTROLES VISUALES Y AUTOCOMPLETADO AUXILIAR 2
+    // A. INYECCIÓN AUTOMÁTICA DE CONTROLES VISUALES Y EVENTOS
     // =========================================================
     let fotosComprobantesActuales = [];
     let gpsInicioActual = null;
@@ -4768,7 +4768,7 @@
     let watchIdGpsLince = null;
     let ultimoEnvioGpsNubeMs = 0;
     let idDespachoCargadoActual = null;
-    let tarifasActualesLince = { valorHoraCustodio: 0, valorHoraCliente: 0, valorKm: 0 };
+    let tarifasActualesLince = { valorHoraCustodio: 0, valorHoraCliente: 0, valorKm: 0, kmBaseIncluidos: 0 };
     let ubicacionesVivoNube = {};
     let despachosNube = [];
 
@@ -4776,6 +4776,11 @@
         despachosNube = JSON.parse(leerStorageSeguro('despachosLince', '[]')) || [];
         if (!Array.isArray(despachosNube)) despachosNube = [];
     } catch (e) { despachosNube = []; }
+
+    try {
+        const tarGuardadas = JSON.parse(leerStorageSeguro('tarifasLince', 'null'));
+        if (tarGuardadas && typeof tarGuardadas === 'object') tarifasActualesLince = Object.assign(tarifasActualesLince, tarGuardadas);
+    } catch (e) {}
 
     function inyectarControlesNuevosEnDOM() {
         // 1. Selector de Clientes Permitidos y Checkbox de Cambio de Clave en #modalUsuarios
@@ -4804,7 +4809,24 @@
             selectRol.addEventListener('change', () => actualizarVisibilidadChecksColaborador(['TODOS']));
         }
 
-        // 2. Botón de Cámara para Fotos de Comprobantes (Remito y Peajes)
+        // 2. Botón para sellar GPS de Inicio en el Objetivo (al lado de Hora de Citación)
+        const inpCitacion = document.getElementById('horaCitacion');
+        if (inpCitacion && !document.getElementById('btnSellarGpsInicioObjetivo')) {
+            const celdaCit = inpCitacion.closest('td');
+            if (celdaCit) {
+                const divGpsIni = document.createElement('div');
+                divGpsIni.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-top:4px; gap:4px;';
+                divGpsIni.innerHTML = `
+                    <button type="button" id="btnSellarGpsInicioObjetivo" onclick="sellarGpsInicioEnObjetivoManual()" style="background:#15803d; color:#fff; border:none; border-radius:3px; padding:3px 6px; font-size:9.5px; font-weight:bold; cursor:pointer;">
+                        📍 SELLAR GPS INICIO AQUÍ
+                    </button>
+                    <span id="lblEstadoGpsInicioPlanilla" style="font-size:9.5px; font-weight:bold; color:#1e3a8a;"></span>
+                `;
+                celdaCit.appendChild(divGpsIni);
+            }
+        }
+
+        // 3. Botón de Cámara para Fotos de Comprobantes (Remito y Peajes)
         const campoPeajes = document.querySelector('[data-campo="peajes"]');
         if (campoPeajes && !document.getElementById('bloqueFotosComprobantes')) {
             const divFotos = document.createElement('div');
@@ -4823,7 +4845,7 @@
             campoPeajes.parentNode.appendChild(divFotos);
         }
 
-        // 3. Barra de Tarifas de Pre-Liquidación en #modalEstadisticas (Solo visible para ADMIN)
+        // 4. Barra de Tarifas y KM Base en #modalEstadisticas (Solo visible para ADMIN)
         const modalStats = document.getElementById('modalEstadisticas');
         const gridKpi = modalStats ? modalStats.querySelector('.grid-tarjetas-control') : null;
         if (gridKpi && !document.getElementById('barraTarifasAdmin')) {
@@ -4832,20 +4854,24 @@
             divTarifas.style.cssText = 'background: #fefce8; border: 2px solid #ca8a04; padding: 10px; border-radius: 6px; margin-bottom: 14px; display: none;';
             divTarifas.innerHTML = `
                 <div style="font-size: 11.5px; font-weight: bold; color: #854d0e; margin-bottom: 8px;">
-                    💲 VALORIZACIÓN AUTOMÁTICA Y PRE-LIQUIDACIÓN (EXCLUSIVO ADMINISTRADOR):
+                    💲 VALORIZACIÓN AUTOMÁTICA, KM BASE Y PRE-LIQUIDACIÓN (EXCLUSIVO ADMINISTRADOR):
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
-                    <div style="flex: 1; min-width: 160px;">
+                    <div style="flex: 1; min-width: 145px;">
                         <span class="etiqueta-celda">VALOR HORA CUSTODIO ($):</span>
                         <input type="number" id="inpTarifaHoraCustodio" placeholder="EJ: 8500" oninput="actualizarTarifasEnVivo()">
                     </div>
-                    <div style="flex: 1; min-width: 160px;">
-                        <span class="etiqueta-celda">VALOR HORA A FACTURAR CLIENTE ($):</span>
+                    <div style="flex: 1; min-width: 145px;">
+                        <span class="etiqueta-celda">VALOR HORA CLIENTE ($):</span>
                         <input type="number" id="inpTarifaHoraCliente" placeholder="EJ: 15000" oninput="actualizarTarifasEnVivo()">
                     </div>
-                    <div style="flex: 1; min-width: 140px;">
+                    <div style="flex: 1; min-width: 120px;">
                         <span class="etiqueta-celda">VALOR POR KM ($):</span>
                         <input type="number" id="inpTarifaKm" placeholder="EJ: 900" oninput="actualizarTarifasEnVivo()">
+                    </div>
+                    <div style="flex: 1; min-width: 135px;">
+                        <span class="etiqueta-celda">KM BASE INCLUIDOS:</span>
+                        <input type="number" id="inpTarifaKmBase" placeholder="EJ: 0 o 50" oninput="actualizarTarifasEnVivo()">
                     </div>
                     <button type="button" class="btn-accion-chico btn-descargar-item" style="width: auto; padding: 9px 14px;" onclick="guardarTarifasEnNube()">
                         💾 FIJAR VALORES
@@ -4855,20 +4881,29 @@
             gridKpi.parentNode.insertBefore(divTarifas, gridKpi);
         }
 
-        // 4. Conectar autocompletado por DNI / CUIT y Nombre para AUXILIAR 2
+        // 5. Autocompletado de AUXILIAR 1 y AUXILIAR 2 + recálculo automático de sus horas excedentes
+        const inpCuitAux1 = document.getElementById('inputCuitAux');
+        const inpNomAux1 = document.getElementById('inputNombreAux');
         const inpCuitAux2 = document.getElementById('inputCuitAux2');
         const inpNomAux2 = document.getElementById('inputNombreAux2');
+
+        if (inpCuitAux1 && inpNomAux1 && !inpCuitAux1.dataset.recalculoHorasActivo) {
+            inpCuitAux1.dataset.recalculoHorasActivo = 'true';
+            inpCuitAux1.addEventListener('input', () => calcularHorasExcedentes());
+            inpNomAux1.addEventListener('input', () => calcularHorasExcedentes());
+        }
+
         if (inpCuitAux2 && inpNomAux2 && !inpCuitAux2.dataset.listenerActivo) {
             inpCuitAux2.dataset.listenerActivo = 'true';
             inpCuitAux2.addEventListener('input', () => {
-                this.value = (inpCuitAux2.value || '').toUpperCase();
+                inpCuitAux2.value = (inpCuitAux2.value || '').toUpperCase();
                 const cust = buscarCustodioPorDniOCuit(inpCuitAux2.value);
                 if (cust) {
                     inpNomAux2.value = (cust.nombreCompleto || cust.username).toUpperCase();
                     inpNomAux2.classList.add('campo-auto');
-                    calcularHorasExcedentes();
-                    guardarBorradorEnVivo();
                 }
+                calcularHorasExcedentes();
+                guardarBorradorEnVivo();
             });
             inpCuitAux2.addEventListener('change', () => {
                 const cust = buscarCustodioPorDniOCuit(inpCuitAux2.value);
@@ -4876,9 +4911,13 @@
                     inpNomAux2.value = (cust.nombreCompleto || cust.username).toUpperCase();
                     if (cust.cuitDni) inpCuitAux2.value = cust.cuitDni.toUpperCase();
                     inpNomAux2.classList.add('campo-auto');
-                    calcularHorasExcedentes();
-                    guardarBorradorEnVivo();
                 }
+                calcularHorasExcedentes();
+                guardarBorradorEnVivo();
+            });
+            inpNomAux2.addEventListener('input', () => {
+                calcularHorasExcedentes();
+                guardarBorradorEnVivo();
             });
             inpNomAux2.addEventListener('change', () => {
                 const cust = buscarCustodioPorNombre(inpNomAux2.value);
@@ -4888,7 +4927,24 @@
                         inpCuitAux2.value = cust.cuitDni.toUpperCase();
                         inpCuitAux2.classList.add('campo-auto');
                     }
-                    calcularHorasExcedentes();
+                }
+                calcularHorasExcedentes();
+                guardarBorradorEnVivo();
+            });
+        }
+
+        // 6. Cálculo automático de KM EXC. al escribir en KILÓMETROS
+        const inpKmTotal = document.querySelector('[data-campo="kilometros"]');
+        const inpKmExc = document.querySelector('[data-campo="kmExc"]');
+        if (inpKmTotal && inpKmExc && !inpKmTotal.dataset.listenerKmActivo) {
+            inpKmTotal.dataset.listenerKmActivo = 'true';
+            inpKmTotal.addEventListener('input', () => {
+                const kmVal = parseFloat(inpKmTotal.value);
+                const kmBase = parseFloat(tarifasActualesLince.kmBaseIncluidos) || 0;
+                if (!isNaN(kmVal) && kmBase > 0) {
+                    const exc = Math.max(0, kmVal - kmBase);
+                    inpKmExc.value = exc > 0 ? String(exc) : '0';
+                    inpKmExc.classList.add('campo-auto');
                     guardarBorradorEnVivo();
                 }
             });
@@ -4896,13 +4952,107 @@
     }
 
     // =========================================================
-    // B. REGLA DEL MÓDULO MÍNIMO DE 4 HORAS (JJEE, AUX 1 Y AUX 2)
+    // B. BORRADOR EN VIVO MEJORADO (CONSERVA FOTOS Y GPS INICIO)
+    // =========================================================
+    guardarBorradorEnVivo = function() {
+        if (!usuarioActivo) return;
+        const datosBorrador = {};
+        document.querySelectorAll('[data-campo]').forEach(el => {
+            const campo = el.getAttribute('data-campo');
+            if (campo === 'numHoja') return;
+            datosBorrador[campo] = (el.value || '').trim().toUpperCase();
+        });
+
+        if (hayFirmaDibujada) {
+            try { datosBorrador.firma = canvas.toDataURL('image/png'); } catch (e) {}
+        } else {
+            datosBorrador.firma = '';
+        }
+
+        datosBorrador.fotosComprobantes = fotosComprobantesActuales;
+        datosBorrador.gpsInicio = gpsInicioActual;
+        datosBorrador.idDespachoOrigen = idDespachoCargadoActual;
+        datosBorrador.actualizado = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        guardarStorageSeguro(obtenerClaveBorradorUsuario(), JSON.stringify(datosBorrador));
+    };
+
+    restaurarBorradorEnVivo = function() {
+        if (!usuarioActivo) return;
+        const raw = leerStorageSeguro(obtenerClaveBorradorUsuario(), '');
+        if (!raw) return;
+
+        try {
+            const b = JSON.parse(raw);
+            if (!b || typeof b !== 'object') return;
+
+            let habiaDatosReales = false;
+            Object.keys(b).forEach(k => {
+                if (!['cliente', 'fecha', 'actualizado', 'firma', 'fotosComprobantes', 'gpsInicio', 'idDespachoOrigen'].includes(k) && b[k]) {
+                    habiaDatosReales = true;
+                }
+            });
+            if (b.firma || (Array.isArray(b.fotosComprobantes) && b.fotosComprobantes.length > 0)) {
+                habiaDatosReales = true;
+            }
+            if (!habiaDatosReales) return;
+
+            document.querySelectorAll('[data-campo]').forEach(el => {
+                const c = el.getAttribute('data-campo');
+                if (c === 'numHoja') return;
+                if (b[c] !== undefined && b[c] !== '') {
+                    el.value = b[c];
+                }
+            });
+
+            if (b.firma) {
+                const img = new Image();
+                img.onload = () => {
+                    if (canvas.width === 0) inicializarCanvas();
+                    ctx.drawImage(img, 0, 0);
+                    hayFirmaDibujada = true;
+                };
+                img.src = b.firma;
+            }
+
+            if (Array.isArray(b.fotosComprobantes)) {
+                fotosComprobantesActuales = b.fotosComprobantes;
+                renderizarGaleriaFotosComprobantes();
+            }
+            if (b.gpsInicio) {
+                gpsInicioActual = b.gpsInicio;
+                actualizarEtiquetaGpsInicioPlanilla();
+            }
+            if (b.idDespachoOrigen) {
+                idDespachoCargadoActual = b.idDespachoOrigen;
+            }
+        } catch (e) {}
+    };
+
+    // =========================================================
+    // C. MÓDULO MÍNIMO DE 4 HORAS (SOLO SUMA A AUX 1 Y AUX 2 SI ESTÁN CARGADOS)
     // =========================================================
     calcularHorasExcedentes = function() {
-        const valInicio = document.getElementById('horaCitacion').value;
-        const valFin = document.getElementById('horaFinalizacion').value;
+        const valInicio = (document.getElementById('horaCitacion') || {}).value || '';
+        const valFin = (document.getElementById('horaFinalizacion') || {}).value || '';
 
-        if (!valInicio || !valFin || !valInicio.includes(':') || !valFin.includes(':')) return;
+        const inpJ = document.getElementById('jjeeHorasExc');
+        const inpA1 = document.getElementById('auxHorasExc');
+        const inpA2 = document.getElementById('aux2HorasExc');
+
+        const tieneAux1 = Boolean(
+            ((document.getElementById('inputNombreAux') || {}).value || '').trim() ||
+            ((document.getElementById('inputCuitAux') || {}).value || '').trim()
+        );
+        const tieneAux2 = Boolean(
+            ((document.getElementById('inputNombreAux2') || {}).value || '').trim() ||
+            ((document.getElementById('inputCuitAux2') || {}).value || '').trim()
+        );
+
+        if (!valInicio || !valFin || !valInicio.includes(':') || !valFin.includes(':')) {
+            if (!tieneAux1 && inpA1 && !esRolAdmin()) { inpA1.value = ''; inpA1.classList.remove('campo-auto'); }
+            if (!tieneAux2 && inpA2 && !esRolAdmin()) { inpA2.value = ''; inpA2.classList.remove('campo-auto'); }
+            return;
+        }
 
         const [hInicio, mInicio] = valInicio.split(':').map(Number);
         const [hFin, mFin] = valFin.split(':').map(Number);
@@ -4915,28 +5065,34 @@
         }
 
         let minutosTrabajados = minutosFin - minutosInicio;
-        // Mínimo obligatorio de 4 horas (240 min); de 4 hs en adelante va la hora real
+        // Regla oficial Lince: mínimo 4 horas (240 min) de arranque
         let minutosComputados = minutosTrabajados < 240 ? 240 : minutosTrabajados;
 
         const horas = Math.floor(minutosComputados / 60);
         const minutos = minutosComputados % 60;
         const textoResultado = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')} HS`;
 
-        const inpJ = document.getElementById('jjeeHorasExc');
-        const inpA1 = document.getElementById('auxHorasExc');
-        const inpA2 = document.getElementById('aux2HorasExc');
-
         if (inpJ) {
             inpJ.value = textoResultado;
             inpJ.classList.add('campo-auto');
         }
         if (inpA1) {
-            inpA1.value = textoResultado;
-            inpA1.classList.add('campo-auto');
+            if (tieneAux1) {
+                inpA1.value = textoResultado;
+                inpA1.classList.add('campo-auto');
+            } else {
+                inpA1.value = '';
+                inpA1.classList.remove('campo-auto');
+            }
         }
         if (inpA2) {
-            inpA2.value = textoResultado;
-            inpA2.classList.add('campo-auto');
+            if (tieneAux2) {
+                inpA2.value = textoResultado;
+                inpA2.classList.add('campo-auto');
+            } else {
+                inpA2.value = '';
+                inpA2.classList.remove('campo-auto');
+            }
         }
     };
 
@@ -4951,7 +5107,7 @@
     }
 
     // =========================================================
-    // C. GPS SIEMPRE ACTIVO EN 1° Y 2° PLANO (DESDE LOGIN HASTA CERRAR SESIÓN)
+    // D. GPS SIEMPRE ACTIVO EN 1° Y 2° PLANO + GPS DE INICIO EN EL OBJETIVO
     // =========================================================
     let workerSegundoPlanoGps = null;
     let wakeLockPantallaGps = null;
@@ -4966,15 +5122,64 @@
         return `${gpsObj.lat}, ${gpsObj.lng}${gpsObj.hora ? ' (' + gpsObj.hora + ')' : ''}`;
     }
 
-    // Mantiene el procesador del celular despierto en segundo plano mientras la sesión esté abierta
+    function actualizarEtiquetaGpsInicioPlanilla() {
+        const lbl = document.getElementById('lblEstadoGpsInicioPlanilla');
+        if (!lbl) return;
+        if (gpsInicioActual && gpsInicioActual.lat) {
+            lbl.innerText = `✔ GPS (${gpsInicioActual.hora || 'OK'})`;
+            lbl.style.color = '#15803d';
+        } else {
+            lbl.innerText = '';
+        }
+    }
+
+    function sellarGpsInicioEnObjetivoManual() {
+        if (!('geolocation' in navigator)) return;
+        const lbl = document.getElementById('lblEstadoGpsInicioPlanilla');
+        if (lbl) { lbl.innerText = 'Buscando GPS...'; lbl.style.color = '#d97706'; }
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const punto = {
+                lat: Number(pos.coords.latitude.toFixed(6)),
+                lng: Number(pos.coords.longitude.toFixed(6)),
+                precision: Math.round(pos.coords.accuracy || 0),
+                hora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+                fechaHora: new Date().toLocaleString('es-AR')
+            };
+            gpsInicioActual = punto;
+            gpsVivoActual = punto;
+            guardarStorageSeguro('gpsInicioBorradorLince', JSON.stringify(punto));
+            guardarBorradorEnVivo();
+            actualizarEtiquetaGpsInicioPlanilla();
+            enviarUbicacionGpsANube(punto, 'ACTIVO EN SERVICIO', true);
+        }, () => {
+            if (gpsVivoActual) {
+                gpsInicioActual = Object.assign({}, gpsVivoActual, {
+                    hora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+                    fechaHora: new Date().toLocaleString('es-AR')
+                });
+                guardarStorageSeguro('gpsInicioBorradorLince', JSON.stringify(gpsInicioActual));
+                guardarBorradorEnVivo();
+                actualizarEtiquetaGpsInicioPlanilla();
+            }
+        }, { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 });
+    }
+
+    // Cuando el custodio elige Hora de Citación o Hora Salida en el reloj, actualiza el GPS de Inicio en el objetivo
+    const _cerrarPopupHoraOrig = cerrarPopupHora;
+    cerrarPopupHora = function() {
+        const campoModificado = inputHoraActivo ? inputHoraActivo.getAttribute('data-campo') : '';
+        _cerrarPopupHoraOrig();
+        if (campoModificado === 'horaCitacion' || campoModificado === 'horaSalida') {
+            sellarGpsInicioEnObjetivoManual();
+        }
+    };
+
     async function activarWakeLockSegundoPlano() {
         if ('wakeLock' in navigator && usuarioActivo) {
             try {
                 if (!wakeLockPantallaGps) {
                     wakeLockPantallaGps = await navigator.wakeLock.request('screen');
-                    wakeLockPantallaGps.addEventListener('release', () => {
-                        wakeLockPantallaGps = null;
-                    });
+                    wakeLockPantallaGps.addEventListener('release', () => { wakeLockPantallaGps = null; });
                 }
             } catch (e) {}
         }
@@ -4989,9 +5194,7 @@
 
     document.addEventListener('visibilitychange', () => {
         if (usuarioActivo) {
-            if (document.visibilityState === 'visible') {
-                activarWakeLockSegundoPlano();
-            }
+            if (document.visibilityState === 'visible') activarWakeLockSegundoPlano();
             forzarLecturaYEnvioGps('ACTIVO EN SERVICIO', true);
         }
     });
@@ -5037,11 +5240,8 @@
 
         activarWakeLockSegundoPlano();
         iniciarWorkerSegundoPlano();
-
-        // 1. Captura inmediata apenas inicia sesión
         forzarLecturaYEnvioGps('ACTIVO EN SERVICIO', true);
 
-        // 2. Rastreador permanente de movimiento
         if (watchIdGpsLince !== null) {
             navigator.geolocation.clearWatch(watchIdGpsLince);
         }
@@ -5073,13 +5273,14 @@
         gpsVivoActual = punto;
         guardarStorageSeguro('ultimaCoordenadaConocidaLince', JSON.stringify(punto));
 
-        // Si es la primera coordenada de la hoja actual, queda sellada como GPS INICIO
         const guardadoPrevio = leerStorageSeguro('gpsInicioBorradorLince', '');
         if (!guardadoPrevio) {
             gpsInicioActual = punto;
             guardarStorageSeguro('gpsInicioBorradorLince', JSON.stringify(punto));
+            actualizarEtiquetaGpsInicioPlanilla();
         } else if (!gpsInicioActual) {
             try { gpsInicioActual = JSON.parse(guardadoPrevio); } catch (e) { gpsInicioActual = punto; }
+            actualizarEtiquetaGpsInicioPlanilla();
         }
 
         enviarUbicacionGpsANube(punto, estadoTexto, forzarEnvio);
@@ -5115,7 +5316,6 @@
         }
     }
 
-    // Apaga el GPS únicamente cuando el custodio toca CERRAR SESIÓN
     async function detenerRastreoGpsPorCierreSesion() {
         if (watchIdGpsLince !== null && 'geolocation' in navigator) {
             navigator.geolocation.clearWatch(watchIdGpsLince);
@@ -5134,7 +5334,6 @@
         }
     }
 
-    // Vincular inicio y cierre de sesión para mantener la sesión viva en 2do plano hasta tocar CERRAR SESIÓN
     const _iniciarSesionBaseGps = iniciarSesion;
     iniciarSesion = async function() {
         await _iniciarSesionBaseGps();
@@ -5164,7 +5363,7 @@
     };
 
     // =========================================================
-    // D. CAMBIO DE CLAVE PERSONAL OBLIGATORIO POR ÚNICA VEZ
+    // E. CAMBIO DE CLAVE PERSONAL OBLIGATORIO POR ÚNICA VEZ
     // =========================================================
     function verificarSiRequiereCambioClave() {
         if (!usuarioActivo || esRolAdmin()) {
@@ -5216,6 +5415,7 @@
             usuarioActivo.clave = c1;
             usuarioActivo.requiereCambioClave = false;
             guardarSesionSegura('sesionActivaLince', JSON.stringify(usuarioActivo));
+            guardarStorageSeguro('sesionPermanenteActivaLince', JSON.stringify(usuarioActivo));
 
             if (navigator.onLine) {
                 await enviarAccionPostNube({
@@ -5235,7 +5435,7 @@
     }
 
     // =========================================================
-    // E. PERMISOS DE CLIENTES ESPECÍFICOS PARA CADA COLABORADOR
+    // F. PERMISOS DE CLIENTES ESPECÍFICOS PARA CADA COLABORADOR
     // =========================================================
     function actualizarVisibilidadChecksColaborador(clientesSeleccionados = ['TODOS']) {
         const selectRol = document.getElementById('nuevoUserRol');
@@ -5460,7 +5660,7 @@
     };
 
     // =========================================================
-    // F. FOTOS DE PEAJES Y REMITOS + PDF A4 CON AUXILIAR 2 Y AUX 2 HORAS EXC.
+    // G. FOTOS DE PEAJES Y REMITOS + PDF A4 CON AUXILIAR 2 Y ANEXO DE FOTOS
     // =========================================================
     function agregarFotoComprobante(inputEl) {
         if (!inputEl.files || !inputEl.files[0]) return;
@@ -5469,7 +5669,7 @@
         reader.onload = function(ev) {
             const img = new Image();
             img.onload = function() {
-                const maxDim = 950;
+                const maxDim = 900;
                 let w = img.width;
                 let h = img.height;
                 if (w > maxDim || h > maxDim) {
@@ -5484,12 +5684,13 @@
                 g.fillStyle = '#ffffff';
                 g.fillRect(0, 0, w, h);
                 g.drawImage(img, 0, 0, w, h);
-                const comprimida = c.toDataURL('image/jpeg', 0.72);
+                const comprimida = c.toDataURL('image/jpeg', 0.68);
                 fotosComprobantesActuales.push({
                     fechaHora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
                     dataUrl: comprimida
                 });
                 renderizarGaleriaFotosComprobantes();
+                guardarBorradorEnVivo();
                 inputEl.value = '';
             };
             img.src = ev.target.result;
@@ -5500,6 +5701,7 @@
     function eliminarFotoComprobante(idx) {
         fotosComprobantesActuales.splice(idx, 1);
         renderizarGaleriaFotosComprobantes();
+        guardarBorradorEnVivo();
     }
 
     function renderizarGaleriaFotosComprobantes() {
@@ -5515,7 +5717,6 @@
         `).join('');
     }
 
-    // Constructor de PDF A4 actualizado con AUXILIAR 2 y AUX 2 HORAS EXC. + Hoja 2 de Fotos
     construirDocumentoPDF = async function(d) {
         const logoParaIncrustar = await obtenerLogoJpegParaPdf();
 
@@ -5692,7 +5893,6 @@
         dibujarCeldaConInput(105, y, 46, 13, 'REMITO N°:', d.remito, true);
         dibujarCeldaConInput(151, y, 46, 13, 'MÓDULO:', d.modulo, true);
 
-        // SECCIÓN 1 EN PDF: 4 COLUMNAS (JJEE, AUXILIAR 1, AUXILIAR 2, MÓVIL)
         y += 15;
         dibujarBarraSeccion(y, 'DATOS DE LA CUSTODIA');
         y += 6;
@@ -5713,13 +5913,12 @@
         dibujarCeldaConInput(109, y, 48, 13, 'CUIT / DNI:', d.cunAux2, true);
         dibujarCeldaConInput(157, y, 40, 13, 'PATENTE:', d.patenteMovil, true);
 
-        // SECCIÓN 2 EN PDF: JJEE HORAS EXC., AUX 1 HORAS EXC., AUX 2 HORAS EXC.
         y += 15;
         dibujarBarraSeccion(y, 'HORAS Y KM. EXCEDENTES / PEAJES');
         y += 6;
         dibujarCeldaConInput(13, y, 31, 13, 'JJEE HS EXC.:', d.jjeeHorasExc, false, true);
-        dibujarCeldaConInput(44, y, 31, 13, 'AUX 1 HS EXC.:', d.auxHorasExc, false, true);
-        dibujarCeldaConInput(75, y, 30, 13, 'AUX 2 HS EXC.:', d.aux2HorasExc, false, true);
+        dibujarCeldaConInput(44, y, 31, 13, 'AUX 1 HS EXC.:', (d.nombreAux || d.cunAux) ? d.auxHorasExc : '', false, true);
+        dibujarCeldaConInput(75, y, 30, 13, 'AUX 2 HS EXC.:', (d.nombreAux2 || d.cunAux2) ? d.aux2HorasExc : '', false, true);
         dibujarCeldaConInput(13, y + 13, 92, 13, 'KM EXC.:', d.kmExc, true);
         dibujarCeldaConInput(105, y, 92, 26, 'DETALLE DE PEAJES:', d.peajes, false);
 
@@ -5848,7 +6047,7 @@
     };
 
     // =========================================================
-    // G. RADAR GPS EN VIVO Y PRECARGA DE SERVICIOS CORREGIDA (JJEE, AUX 1 Y AUX 2)
+    // H. RADAR GPS EN VIVO Y PRECARGA DE SERVICIOS POR CUENTA DE USUARIO
     // =========================================================
     async function abrirModalRadarDespacho() {
         if (!esRolAdminOColaborador()) return;
@@ -5983,7 +6182,6 @@
         renderizarRadarYDespachos();
         await enviarAccionPostNube({ accion: 'guardarDespachos', despachos: despachosNube });
 
-        // Si el usuario logueado actualmente está en esa orden, se lo precarga en su planilla inmediatamente
         verificarDespachoAsignadoAlCustodio(true);
 
         const destinatarios = [nuevoDesp.nombreJjee, nuevoDesp.nombreAux, nuevoDesp.nombreAux2].filter(Boolean).join(' / ');
@@ -6012,7 +6210,7 @@
         setVal('inputNumMovil', miDespacho.numMovil);
         setVal('inputPatenteMovil', miDespacho.patenteMovil);
 
-        // Guardar encima del borrador para que el borrador automático nunca pise la orden precargada
+        calcularHorasExcedentes();
         guardarBorradorEnVivo();
 
         const alerta = document.getElementById('mensajeExito');
@@ -6039,7 +6237,6 @@
         await enviarAccionPostNube({ accion: 'guardarDespachos', despachos: despachosNube });
     }
 
-    // Verifica si el usuario que entró es JJEE, AUXILIAR 1 o AUXILIAR 2 en alguna orden pendiente
     function verificarDespachoAsignadoAlCustodio(forzar = false) {
         if (!usuarioActivo) return;
         const miUser = String(usuarioActivo.username || '').trim().toUpperCase();
@@ -6064,12 +6261,13 @@
     }
 
     // =========================================================
-    // H. TARIFAS Y PRE-LIQUIDACIÓN EN EL TABLERO DE ESTADÍSTICAS
+    // I. TARIFAS, KM BASE Y PRE-LIQUIDACIÓN EN EL TABLERO
     // =========================================================
     function actualizarTarifasEnVivo() {
         tarifasActualesLince.valorHoraCustodio = parseFloat((document.getElementById('inpTarifaHoraCustodio') || {}).value) || 0;
         tarifasActualesLince.valorHoraCliente = parseFloat((document.getElementById('inpTarifaHoraCliente') || {}).value) || 0;
         tarifasActualesLince.valorKm = parseFloat((document.getElementById('inpTarifaKm') || {}).value) || 0;
+        tarifasActualesLince.kmBaseIncluidos = parseFloat((document.getElementById('inpTarifaKmBase') || {}).value) || 0;
         renderizarEstadisticasControl();
     }
 
@@ -6078,17 +6276,18 @@
         actualizarTarifasEnVivo();
         guardarStorageSeguro('tarifasLince', JSON.stringify(tarifasActualesLince));
         await enviarAccionPostNube({ accion: 'guardarTarifas', tarifas: tarifasActualesLince });
-        alert('💲 VALORES DE HORA Y KM GUARDADOS EN LA NUBE.');
+        alert('💲 VALORES DE HORA, KM Y KM BASE GUARDADOS EN LA NUBE.');
     }
 
     // =========================================================
-    // I. INTEGRACIÓN CON HISTORIAL, EXCEL, ESTADÍSTICAS (CON AUX 2) Y PRECARGA
+    // J. SINCRONIZACIÓN UNIFICADA EN 1 SOLA LLAMADA RÁPIDA + HISTORIAL Y EXCEL
     // =========================================================
     const _aplicarInterfazOrig2 = aplicarInterfazPorUsuario;
     aplicarInterfazPorUsuario = function() {
         inyectarControlesNuevosEnDOM();
         _aplicarInterfazOrig2();
         aplicarBloqueoEdicionHorasExcedentes();
+        actualizarEtiquetaGpsInicioPlanilla();
 
         const btnRadar = document.getElementById('btnRadarDespacho');
         if (btnRadar) {
@@ -6102,14 +6301,12 @@
         if (usuarioActivo) {
             verificarSiRequiereCambioClave();
             iniciarRastreoGpsContinuo();
-            // Se ejecuta después de los 60ms del borrador para que la orden precargada tenga prioridad siempre
             setTimeout(() => {
                 verificarDespachoAsignadoAlCustodio(true);
             }, 120);
         }
     };
 
-    // Buscador de Historial incluyendo AUXILIAR 2 + filtro por cliente de Colaborador
     obtenerHistorialFiltradoActual = function() {
         const inpBuscar = document.getElementById('inputBuscarHistorial');
         const terminoBusqueda = inpBuscar ? inpBuscar.value.trim().toUpperCase() : '';
@@ -6155,8 +6352,7 @@
         return historialVisible;
     };
 
-    // Mostrar AUXILIAR 2 y enlaces de GPS Inicio/Fin en la tabla de Historial
-    // Mostrar Coordenadas exactas + botón de Mapa de GPS INICIO y GPS FIN en el Historial
+    // Mostrar Coordenadas GPS Inicio/Fin, Auxiliar 2 y Botón directo al PDF en Google Drive
     const _mostrarHistorialBase = mostrarHistorial;
     mostrarHistorial = function() {
         _mostrarHistorialBase();
@@ -6166,7 +6362,7 @@
         const filas = tbody.querySelectorAll('tr');
         historialVisible.forEach((item, idx) => {
             const fila = filas[idx];
-            if (!fila || !fila.cells || fila.cells.length < 6) return;
+            if (!fila || !fila.cells || fila.cells.length < 7) return;
 
             const celdaFecha = fila.cells[1];
             if (celdaFecha && !celdaFecha.querySelector('.links-gps-historial')) {
@@ -6177,9 +6373,11 @@
                 const linkFin = formatearLinkMaps(item.gpsFin);
                 const coordIni = formatearTextoCoordenada(item.gpsInicio);
                 const coordFin = formatearTextoCoordenada(item.gpsFin);
+                const cantFotos = item.cantidadFotosAdjuntas || (Array.isArray(item.fotosComprobantes) ? item.fotosComprobantes.length : 0);
                 divGps.innerHTML = `
                     ${linkIni ? `<div style="margin-top:3px;"><a href="${linkIni}" target="_blank" style="font-size:10px; font-weight:bold; color:#15803d; text-decoration:underline;">📍 INICIO: ${coordIni}</a></div>` : ''}
-                    ${linkFin ? `<div style="margin-top:3px;"><a href="${linkFin}" target="_blank" style="font-size:10px; font-weight:bold; color:#1d4ed8; text-decoration:underline;">🏁 FIN (AL GUARDAR): ${coordFin}</a></div>` : ''}
+                    ${linkFin ? `<div style="margin-top:3px;"><a href="${linkFin}" target="_blank" style="font-size:10px; font-weight:bold; color:#1d4ed8; text-decoration:underline;">🏁 FIN: ${coordFin}</a></div>` : ''}
+                    ${cantFotos > 0 ? `<div style="margin-top:3px; font-size:10px; font-weight:bold; color:#0369a1;">📷 ${cantFotos} foto(s) en PDF</div>` : ''}
                 `;
                 celdaFecha.appendChild(divGps);
             }
@@ -6190,10 +6388,21 @@
                 divAux2.innerHTML = `<b>AUX 2:</b> ${item.nombreAux2 || '-'} (${item.cunAux2 || '-'})`;
                 celdaCustodios.insertBefore(divAux2, celdaCustodios.lastElementChild);
             }
+
+            const celdaAcciones = fila.cells[6];
+            if (celdaAcciones && item.urlPdfDrive && !celdaAcciones.querySelector('.btn-abrir-drive-directo')) {
+                const contAcc = celdaAcciones.querySelector('.contenedor-acciones') || celdaAcciones;
+                const linkDrive = document.createElement('a');
+                linkDrive.href = item.urlPdfDrive;
+                linkDrive.target = '_blank';
+                linkDrive.className = 'btn-accion-chico btn-cargar btn-abrir-drive-directo';
+                linkDrive.style.cssText = 'text-decoration:none; display:inline-block; text-align:center; background:linear-gradient(180deg, #0284c7 0%, #0369a1 100%);';
+                linkDrive.innerText = '☁️ VER DRIVE';
+                contAcc.insertBefore(linkDrive, contAcc.firstChild);
+            }
         });
     };
 
-    // Sumar también a AUXILIAR 2 en el Tablero de Control de Horas y Estadísticas
     obtenerDatosConsolidadosControl = function() {
         let historial = [];
         try { historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || []; } catch (e) { historial = []; }
@@ -6262,8 +6471,8 @@
             const minServicio = calcularMinutosServicio(h.horaCitacion, h.horaFinalizacion);
             const minConMinimo4Hs = minServicio > 0 ? Math.max(240, minServicio) : 0;
             const minExcJjee = parsearTextoHorasAMinutos(h.jjeeHorasExc);
-            const minExcAux1 = parsearTextoHorasAMinutos(h.auxHorasExc);
-            const minExcAux2 = parsearTextoHorasAMinutos(h.aux2HorasExc);
+            const minExcAux1 = (h.nombreAux || h.cunAux) ? parsearTextoHorasAMinutos(h.auxHorasExc) : 0;
+            const minExcAux2 = (h.nombreAux2 || h.cunAux2) ? parsearTextoHorasAMinutos(h.aux2HorasExc) : 0;
             const minRealHoja = minConMinimo4Hs > 0 ? minConMinimo4Hs : Math.max(minExcJjee, minExcAux1, minExcAux2);
             const kmHoja = parseFloat(h.kilometros) || 0;
 
@@ -6406,6 +6615,7 @@
             'MAPA GPS INICIO',
             'COORDENADAS FIN (AL GUARDAR)',
             'MAPA GPS FIN',
+            'LINK PDF EN GOOGLE DRIVE',
             'RESPONSABLE FIRMA',
             'DNI RESPONSABLE FIRMA',
             'OBSERVACIONES'
@@ -6439,8 +6649,8 @@
                 item.horaCitacion || '',
                 item.horaFinalizacion || '',
                 item.jjeeHorasExc || '',
-                item.auxHorasExc || '',
-                item.aux2HorasExc || '',
+                (item.nombreAux || item.cunAux) ? (item.auxHorasExc || '') : '',
+                (item.nombreAux2 || item.cunAux2) ? (item.aux2HorasExc || '') : '',
                 item.kilometros || '',
                 item.kmExc || '',
                 item.remito || '',
@@ -6450,6 +6660,7 @@
                 formatearLinkMaps(item.gpsInicio),
                 formatearTextoCoordenada(item.gpsFin),
                 formatearLinkMaps(item.gpsFin),
+                item.urlPdfDrive || '',
                 item.firmaApellidoNombre || '',
                 item.firmaDni || '',
                 item.observaciones || ''
@@ -6469,54 +6680,228 @@
         setTimeout(() => URL.revokeObjectURL(url), 2000);
     };
 
-    const _sincronizarEstadoOrig = sincronizarEstadoCompletoConNube;
-    sincronizarEstadoCompletoConNube = async function(subirLocal = false, forzarRedibujado = false) {
-        // Si había un ping de GPS guardado offline, lo sube apenas vuelve la señal
-        if (navigator.onLine) {
-            const gpsPend = leerStorageSeguro('gpsPendienteOfflineLince', '');
-            if (gpsPend) {
-                try {
-                    const objGps = JSON.parse(gpsPend);
-                    localStorage.removeItem('gpsPendienteOfflineLince');
-                    await enviarAccionPostNube({ accion: 'reportarGpsVivo', username: objGps.username, ubicacion: objGps });
-                } catch (e) {}
+    // Envío de PDF que captura el link directo de Google Drive y limpia las fotos pesadas del historial local
+    enviarACarpetasAutomaticasEnNube = async function(d, urlNube, nombreCarpetaAnio, nombreCarpetaMes) {
+        if (!navigator.onLine) return false;
+        try {
+            const doc = await construirDocumentoPDF(d);
+            const dataUri = doc.output('datauristring');
+            const pdfBase64 = dataUri.indexOf('base64,') !== -1 ? dataUri.split('base64,')[1] : dataUri.split(',')[1];
+
+            // En la copia para el JSON del historial no mandamos las fotos pesadas (ya van dentro del PDF)
+            const copiaDatosLiviana = Object.assign({}, d);
+            if (Array.isArray(copiaDatosLiviana.fotosComprobantes)) {
+                copiaDatosLiviana.cantidadFotosAdjuntas = copiaDatosLiviana.fotosComprobantes.length;
+                delete copiaDatosLiviana.fotosComprobantes;
             }
+
+            const payload = {
+                carpetaPrincipal: 'Hoja de ruta',
+                carpetaAnio: nombreCarpetaAnio,
+                carpetaMes: nombreCarpetaMes,
+                nombreArchivo: `Hoja_de_Ruta_${d.numHoja || '00000000'}.pdf`,
+                pdfBase64: pdfBase64,
+                datosHoja: copiaDatosLiviana
+            };
+
+            const cuerpoJson = JSON.stringify(payload);
+
+            try {
+                const resp = await fetch(urlNube, {
+                    method: 'POST',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: cuerpoJson
+                });
+                if (resp && resp.ok) {
+                    const dataResp = await resp.json();
+                    if (dataResp && dataResp.urlPdfDrive) {
+                        guardarUrlPdfDriveEnHistorialLocal(d.id, dataResp.urlPdfDrive, dataResp.numHoja);
+                    }
+                }
+            } catch (errCors) {
+                await fetch(urlNube, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: cuerpoJson
+                });
+            }
+            return true;
+        } catch (err) {
+            return false;
+        }
+    };
+
+    function guardarUrlPdfDriveEnHistorialLocal(idHoja, urlDrive, numHojaConfirmado) {
+        try {
+            let hist = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
+            hist.forEach(h => {
+                if (String(h.id) === String(idHoja)) {
+                    h.subidoADrive = true;
+                    if (urlDrive) h.urlPdfDrive = urlDrive;
+                    if (numHojaConfirmado) h.numHoja = numHojaConfirmado;
+                    if (Array.isArray(h.fotosComprobantes)) {
+                        h.cantidadFotosAdjuntas = h.fotosComprobantes.length;
+                        delete h.fotosComprobantes;
+                    }
+                }
+            });
+            guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(hist));
+        } catch (e) {}
+    }
+
+    // Sincronización unificada en 1 sola petición limpia (sin doble fetch)
+    sincronizarEstadoCompletoConNube = async function(subirLocal = false, forzarRedibujado = false) {
+        actualizarIndicadorConexionYCola();
+        if (!navigator.onLine) return;
+
+        // 1. Si había un ping GPS offline pendiente, subirlo
+        const gpsPend = leerStorageSeguro('gpsPendienteOfflineLince', '');
+        if (gpsPend) {
+            try {
+                const objGps = JSON.parse(gpsPend);
+                localStorage.removeItem('gpsPendienteOfflineLince');
+                await enviarAccionPostNube({ accion: 'reportarGpsVivo', username: objGps.username, ubicacion: objGps });
+            } catch (e) {}
         }
 
-        await _sincronizarEstadoOrig(subirLocal, forzarRedibujado);
-        if (!navigator.onLine) return;
+        // 2. Si había hojas en la cola offline, procesarlas
+        if (obtenerColaOffline().length > 0) {
+            await procesarColaOffline();
+        }
+
+        if (sincronizandoEstadoLince) return;
+        sincronizandoEstadoLince = true;
         try {
             const u = obtenerUrlActivaNube();
+            let hLocal = [];
+            try { hLocal = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || []; } catch (e) { hLocal = []; }
+            const nLocal = parseInt(leerStorageSeguro('proximoNumHojaLince', '0'), 10) || 0;
+
+            if (subirLocal && (hLocal.length > 0 || nLocal > 0)) {
+                const hLocalLiviano = hLocal.map(item => {
+                    const c = Object.assign({}, item);
+                    if (Array.isArray(c.fotosComprobantes)) {
+                        c.cantidadFotosAdjuntas = c.fotosComprobantes.length;
+                        delete c.fotosComprobantes;
+                    }
+                    return c;
+                });
+                await enviarAccionPostNube({ accion: 'sincronizarEstado', proximoNumHoja: nLocal, historial: hLocalLiviano });
+            }
+
             const sep = u.includes('?') ? '&' : '?';
-            const r = await fetch(u + sep + 'accion=obtenerEstado&t=' + Date.now(), { method: 'GET', redirect: 'follow', cache: 'no-store' });
+            const r = await fetch(u + sep + 'accion=obtenerEstado&t=' + Date.now(), {
+                method: 'GET',
+                redirect: 'follow',
+                cache: 'no-store'
+            });
             if (r.ok) {
                 const d = await r.json();
-                if (d && d.ubicacionesVivo) ubicacionesVivoNube = d.ubicacionesVivo;
+
+                if (d && Array.isArray(d.usuarios) && d.usuarios.length > 0) {
+                    const fusionados = fusionarUsuariosLocalYNube(d.usuarios, obtenerListaUsuarios());
+                    const strUsers = JSON.stringify(fusionados);
+                    if (strUsers !== leerStorageSeguro('usuariosLince', '')) {
+                        guardarStorageSeguro('usuariosLince', strUsers);
+                        actualizarDatalistsCustodios();
+                    }
+                }
+
+                if (d && Array.isArray(d.clientes) && d.clientes.length > 0) {
+                    guardarStorageSeguro('clientesLince', JSON.stringify(d.clientes));
+                }
+
+                if (d && Array.isArray(d.moviles) && d.moviles.length > 0) {
+                    const strMov = JSON.stringify(d.moviles);
+                    if (strMov !== leerStorageSeguro('movilesLince', '')) {
+                        guardarStorageSeguro('movilesLince', strMov);
+                        actualizarDatalistsMoviles();
+                    }
+                }
+
+                if (d && d.ubicacionesVivo) {
+                    ubicacionesVivoNube = d.ubicacionesVivo;
+                }
+
                 if (d && Array.isArray(d.despachos)) {
                     despachosNube = d.despachos;
                     guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
                     verificarDespachoAsignadoAlCustodio(false);
                 }
+
                 if (d && d.tarifas) {
-                    tarifasActualesLince = d.tarifas;
+                    tarifasActualesLince = Object.assign({ valorHoraCustodio: 0, valorHoraCliente: 0, valorKm: 0, kmBaseIncluidos: 0 }, d.tarifas);
+                    guardarStorageSeguro('tarifasLince', JSON.stringify(tarifasActualesLince));
                     const i1 = document.getElementById('inpTarifaHoraCustodio');
                     const i2 = document.getElementById('inpTarifaHoraCliente');
                     const i3 = document.getElementById('inpTarifaKm');
+                    const i4 = document.getElementById('inpTarifaKmBase');
                     if (i1 && !document.activeElement.isSameNode(i1)) i1.value = tarifasActualesLince.valorHoraCustodio || '';
                     if (i2 && !document.activeElement.isSameNode(i2)) i2.value = tarifasActualesLince.valorHoraCliente || '';
                     if (i3 && !document.activeElement.isSameNode(i3)) i3.value = tarifasActualesLince.valorKm || '';
+                    if (i4 && !document.activeElement.isSameNode(i4)) i4.value = tarifasActualesLince.kmBaseIncluidos || '';
                 }
+
+                if (d && Array.isArray(d.historial)) {
+                    const elim = Array.isArray(d.idsEliminados) ? d.idsEliminados.map(String) : [];
+                    const mapa = new Map();
+                    d.historial.forEach(x => {
+                        if (x && x.id && !elim.includes(String(x.id))) {
+                            x.subidoADrive = true;
+                            mapa.set(String(x.id), x);
+                        }
+                    });
+                    hLocal.forEach(x => {
+                        if (x && x.id && !elim.includes(String(x.id))) {
+                            if (!mapa.has(String(x.id))) {
+                                mapa.set(String(x.id), x);
+                            } else if (x.urlPdfDrive && !mapa.get(String(x.id)).urlPdfDrive) {
+                                mapa.get(String(x.id)).urlPdfDrive = x.urlPdfDrive;
+                            }
+                        }
+                    });
+                    const unido = Array.from(mapa.values()).sort((a, b) => (b.id || 0) - (a.id || 0));
+
+                    let maxH = 0;
+                    unido.forEach(x => { const n = parseInt(x.numHoja, 10); if (!isNaN(n) && (n + 1) > maxH) maxH = n + 1; });
+                    const nNube = parseInt(d.proximoNumHoja, 10) || 0;
+                    const finalNum = d.forzarCero ? 0 : Math.max(nLocal, nNube, maxH);
+
+                    const firmaNueva = `${finalNum}|${unido.length}|${unido[0] ? unido[0].id : 0}|${elim.length}|${unido[0] ? (unido[0].urlPdfDrive || '') : ''}`;
+                    if (forzarRedibujado || firmaNueva !== ultimaFirmaEstadoInstantaneo) {
+                        ultimaFirmaEstadoInstantaneo = firmaNueva;
+                        guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(unido));
+                        guardarStorageSeguro('proximoNumHojaLince', String(finalNum));
+                        guardarStorageSeguro('contadorResetA0_v1', 'true');
+                        actualizarInputNumeroHoja();
+                        mostrarHistorial();
+                        if (document.getElementById('modalEstadisticas').style.display === 'block') {
+                            renderizarEstadisticasControl();
+                        }
+                    }
+                }
+
                 if (document.getElementById('modalRadarDespacho').style.display === 'block') {
                     renderizarRadarYDespachos();
                 }
             }
-        } catch (e) {}
+        } catch (e) {} finally {
+            sincronizandoEstadoLince = false;
+        }
     };
 
-    // Guardado de Hoja de Ruta que sella GPS INICIO y GPS FIN antes de subir a la nube
+    // Guardado de Hoja de Ruta blindado (con limpieza de horas de auxiliares vacíos y fotos en PDF)
     guardarHojaDeRuta = async function() {
         if (!esRolAdmin()) {
             calcularHorasExcedentes();
+        } else {
+            // Si es Admin pero dejó vacíos Aux 1 o Aux 2, limpiar sus horas excedentes automáticas
+            const tieneA1 = Boolean(((document.getElementById('inputNombreAux') || {}).value || '').trim() || ((document.getElementById('inputCuitAux') || {}).value || '').trim());
+            const tieneA2 = Boolean(((document.getElementById('inputNombreAux2') || {}).value || '').trim() || ((document.getElementById('inputCuitAux2') || {}).value || '').trim());
+            if (!tieneA1 && document.getElementById('auxHorasExc')) document.getElementById('auxHorasExc').value = '';
+            if (!tieneA2 && document.getElementById('aux2HorasExc')) document.getElementById('aux2HorasExc').value = '';
         }
 
         const d = {};
@@ -6542,7 +6927,6 @@
         btnGuardar.innerText = 'TOMANDO COORDENADAS FINALES Y GUARDANDO...';
 
         try {
-            // 1. Capturar coordenada GPS exacta del momento en que finaliza y guarda la Hoja de Ruta
             if ('geolocation' in navigator) {
                 await new Promise((resolve) => {
                     navigator.geolocation.getCurrentPosition((pos) => {
@@ -6573,6 +6957,7 @@
             d.gpsInicio = gpsInicioActual || ultimaConocida || null;
             d.gpsFin = ultimaConocida || gpsInicioActual || null;
             d.fotosComprobantes = fotosComprobantesActuales.slice();
+            d.cantidadFotosAdjuntas = fotosComprobantesActuales.length;
 
             if (idDespachoCargadoActual) {
                 d.idDespachoOrigen = idDespachoCargadoActual;
@@ -6580,12 +6965,16 @@
                 guardarStorageSeguro('despachosLince', JSON.stringify(despachosNube));
             }
 
+            // En el historial local guardamos la ficha liviana (las fotos viajan al PDF en segundo plano)
+            const fichaHistorialLocal = Object.assign({}, d);
+            delete fichaHistorialLocal.fotosComprobantes;
+
             let historial = [];
             try {
-                historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
+                historial = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]'));
                 if (!Array.isArray(historial)) historial = [];
             } catch (e) { historial = []; }
-            historial.unshift(d);
+            historial.unshift(fichaHistorialLocal);
             guardarStorageSeguro('hojasDeRutaLince', JSON.stringify(historial));
 
             borrarBorradorEnVivoActual();
@@ -6594,6 +6983,7 @@
             idDespachoCargadoActual = null;
             try { localStorage.removeItem('gpsInicioBorradorLince'); } catch (e) {}
             renderizarGaleriaFotosComprobantes();
+            actualizarEtiquetaGpsInicioPlanilla();
 
             document.querySelectorAll('[data-campo]').forEach(i => {
                 const c = i.getAttribute('data-campo');
@@ -6647,7 +7037,7 @@
                     await sincronizarEstadoCompletoConNube(true, true);
                 } else {
                     const cola = obtenerColaOffline();
-                    cola.push({ datosHoja: d, nombreCarpetaAnio, nombreCarpetaMes });
+                    cola.push({ datosHoja: d, nombreCarpetaAnio, nombreCarpetaMes, numeroConfirmadoNube: Boolean(numAsignadoNube) });
                     guardarColaOffline(cola);
                     mostrarHistorial();
                 }
@@ -6658,7 +7048,7 @@
         }
     };
 
-    // Restaurar sesión permanente si el custodio no tocó CERRAR SESIÓN
+    // Inicialización general
     inyectarControlesNuevosEnDOM();
     if (!usuarioActivo) {
         const sesionPerm = leerStorageSeguro('sesionPermanenteActivaLince', '');
@@ -6674,6 +7064,7 @@
         aplicarBloqueoEdicionHorasExcedentes();
         verificarSiRequiereCambioClave();
         iniciarRastreoGpsContinuo();
+        actualizarEtiquetaGpsInicioPlanilla();
         setTimeout(() => verificarDespachoAsignadoAlCustodio(true), 120);
     }
 </script>
