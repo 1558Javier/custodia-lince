@@ -6280,11 +6280,271 @@
     }
 
     // =========================================================
-    // J. SINCRONIZACIÓN UNIFICADA EN 1 SOLA LLAMADA RÁPIDA + HISTORIAL Y EXCEL
+    /// =========================================================
+    // J. HISTORIAL VISUAL EN TARJETAS (PC Y CELULAR) + NOMBRE DE SERVICIO (SALIDA) Y FILTROS
     // =========================================================
+    function inyectarEstilosYControlesServicioHistorial() {
+        // 1. Estilos para que en Celular cada Hoja sea una Tarjeta separada y en PC una tabla limpia
+        if (!document.getElementById('estilosHistorialTarjetasLince')) {
+            const style = document.createElement('style');
+            style.id = 'estilosHistorialTarjetasLince';
+            style.innerHTML = `
+                #tablaHistorial tr.fila-hoja-historial td {
+                    border-bottom: 3px solid #143627 !important;
+                    padding: 8px 7px !important;
+                    vertical-align: top !important;
+                }
+                .etiqueta-movil-hist {
+                    display: none;
+                    font-size: 10px;
+                    font-weight: bold;
+                    color: #475569;
+                    text-transform: uppercase;
+                    margin-bottom: 3px;
+                    letter-spacing: 0.4px;
+                }
+                .caja-servicio-salida {
+                    margin-top: 5px;
+                    background-color: #eff6ff;
+                    border: 1px solid #93c5fd;
+                    border-left: 4px solid #2563eb;
+                    border-radius: 4px;
+                    padding: 5px 7px;
+                    text-align: left;
+                }
+                .caja-servicio-salida .titulo-serv {
+                    font-size: 9.5px;
+                    font-weight: bold;
+                    color: #1e40af;
+                    display: block;
+                    margin-bottom: 2px;
+                }
+                .caja-servicio-salida .valor-serv {
+                    font-size: 11.5px;
+                    font-weight: bold;
+                    color: #0f172a;
+                    word-break: break-word;
+                }
+                .caja-servicio-llegada {
+                    margin-top: 3px;
+                    font-size: 10.5px;
+                    color: #334155;
+                    font-weight: bold;
+                }
+                .chip-gps-compacto {
+                    display: inline-block;
+                    padding: 4px 7px;
+                    border-radius: 4px;
+                    font-size: 10px;
+                    font-weight: bold;
+                    text-decoration: none;
+                    margin-top: 4px;
+                    width: 100%;
+                    text-align: center;
+                    box-sizing: border-box;
+                }
+                .chip-gps-ini {
+                    background-color: #dcfce7;
+                    color: #166534;
+                    border: 1px solid #86efac;
+                }
+                .chip-gps-fin {
+                    background-color: #dbeafe;
+                    color: #1e40af;
+                    border: 1px solid #93c5fd;
+                }
+                .bloque-custodio-item {
+                    background: #f8fafc;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 4px;
+                    padding: 4px 6px;
+                    margin-bottom: 4px;
+                    font-size: 11.5px;
+                    text-align: left;
+                }
+                .badge-horas-hist {
+                    display: inline-block;
+                    background: #f0fdf4;
+                    border: 1.5px solid #16a34a;
+                    color: #166534;
+                    font-weight: bold;
+                    font-size: 13px;
+                    padding: 5px 8px;
+                    border-radius: 6px;
+                }
+                .grilla-acciones-hist {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    align-items: center;
+                }
+                .grilla-acciones-hist .btn-accion-chico {
+                    width: 100% !important;
+                    max-width: 130px;
+                    padding: 7px 6px !important;
+                    font-size: 10.5px !important;
+                    text-align: center;
+                    text-decoration: none;
+                    display: inline-block;
+                }
+
+                /* VISTA TARJETAS SEPARADAS EN CELULAR */
+                @media (max-width: 720px) {
+                    #modalHistorial .tabla-responsive thead {
+                        display: none !important;
+                    }
+                    #tablaHistorial tr.fila-hoja-historial {
+                        display: block !important;
+                        background: #ffffff !important;
+                        border: 2.5px solid #143627 !important;
+                        border-radius: 10px !important;
+                        margin-bottom: 20px !important;
+                        box-shadow: 0 6px 16px rgba(0,0,0,0.22) !important;
+                        overflow: hidden !important;
+                    }
+                    #tablaHistorial tr.fila-hoja-historial td {
+                        display: block !important;
+                        width: 100% !important;
+                        border: none !important;
+                        border-bottom: 1px dashed #cbd5e1 !important;
+                        padding: 10px 12px !important;
+                        text-align: left !important;
+                    }
+                    #tablaHistorial tr.fila-hoja-historial td.celda-cabecera-tarjeta {
+                        background: linear-gradient(90deg, #143627 0%, #1e4d38 100%) !important;
+                        color: #ffffff !important;
+                        padding: 10px 14px !important;
+                        border-bottom: 2px solid #000 !important;
+                        display: flex !important;
+                        justify-content: space-between !important;
+                        align-items: center !important;
+                    }
+                    #tablaHistorial tr.fila-hoja-historial td.celda-cabecera-tarjeta .num-hoja-movil {
+                        font-size: 15px !important;
+                        color: #ffffff !important;
+                    }
+                    .etiqueta-movil-hist {
+                        display: block !important;
+                    }
+                    .contenedor-chips-gps-movil {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 8px;
+                        margin-top: 4px;
+                    }
+                    .grilla-acciones-hist {
+                        display: grid !important;
+                        grid-template-columns: 1fr 1fr !important;
+                        gap: 8px !important;
+                        background: #f1f5f9;
+                        padding: 4px;
+                        border-radius: 6px;
+                    }
+                    .grilla-acciones-hist .btn-accion-chico {
+                        max-width: none !important;
+                        padding: 10px 8px !important;
+                        font-size: 11.5px !important;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // 2. Mostrar debajo de la casilla CLIENTE en la planilla principal la referencia en vivo de la Dirección de Salida
+        const inpCliente = document.getElementById('clientePredeterminado');
+        if (inpCliente && !document.getElementById('refServicioSalidaEnCliente')) {
+            const divRef = document.createElement('div');
+            divRef.id = 'refServicioSalidaEnCliente';
+            divRef.style.cssText = 'margin-top: 4px; font-size: 11px; font-weight: bold; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 7px; border-radius: 4px;';
+            divRef.innerText = '🚩 SERVICIO (SALIDA): Completar en Dirección Salida 1';
+            inpCliente.parentNode.parentNode.appendChild(divRef);
+
+            const actualizarRefSalidaVivo = () => {
+                const dSal = ((document.querySelector('[data-campo="dirSalida"]') || {}).value || '').trim();
+                const lSal = ((document.querySelector('[data-campo="locSalida"]') || {}).value || '').trim();
+                const texto = [dSal, lSal].filter(Boolean).join(' - ');
+                divRef.innerText = texto
+                    ? `🚩 SERVICIO (SALIDA): ${texto}`
+                    : '🚩 SERVICIO (SALIDA): Completar en Dirección Salida 1';
+            };
+
+            const inpDirSal = document.querySelector('[data-campo="dirSalida"]');
+            const inpLocSal = document.querySelector('[data-campo="locSalida"]');
+            if (inpDirSal) inpDirSal.addEventListener('input', actualizarRefSalidaVivo);
+            if (inpLocSal) inpLocSal.addEventListener('input', actualizarRefSalidaVivo);
+            setTimeout(actualizarRefSalidaVivo, 200);
+        }
+
+        // 3. Agregar selector "FILTRAR POR SERVICIO / SALIDA" en el Historial
+        const barraBuscador = document.querySelector('.barra-buscador-historial');
+        if (barraBuscador && !document.getElementById('selectFiltroServicioSalida')) {
+            const divFiltroServ = document.createElement('div');
+            divFiltroServ.style.cssText = 'display: flex; align-items: center; gap: 6px; width: 100%; padding-top: 6px; border-top: 1px dashed #93c5fd;';
+            divFiltroServ.innerHTML = `
+                <span style="font-weight: bold; font-size: 11.5px; color: #1e3a8a; white-space: nowrap;">🚩 FILTRAR POR SERVICIO / SALIDA:</span>
+                <select id="selectFiltroServicioSalida" onchange="mostrarHistorial()" style="flex: 1; max-width: 420px; font-size: 12px; padding: 5px;">
+                    <option value="TODOS">VER TODOS LOS SERVICIOS / DIRECCIONES DE SALIDA</option>
+                </select>
+            `;
+            barraBuscador.appendChild(divFiltroServ);
+
+            const inpBusq = document.getElementById('inputBuscarHistorial');
+            if (inpBusq) {
+                inpBusq.placeholder = 'BUSCAR POR DIRECCIÓN DE SALIDA, LOCALIDAD, CLIENTE, DNI, NOMBRE, N° HOJA O MÓVIL...';
+            }
+        }
+    }
+
+    function obtenerNombreServicioSalida(item) {
+        if (!item) return 'SIN DIRECCIÓN DE SALIDA';
+        const dir1 = String(item.dirSalida || '').trim().toUpperCase();
+        const loc1 = String(item.locSalida || '').trim().toUpperCase();
+        const principal = [dir1, loc1].filter(Boolean).join(' - ');
+        return principal || 'SIN DIRECCIÓN DE SALIDA';
+    }
+
+    function obtenerDestinoLlegada(item) {
+        if (!item) return '';
+        const dirL = String(item.dirLlegada || '').trim().toUpperCase();
+        const locL = String(item.locLlegada || '').trim().toUpperCase();
+        return [dirL, locL].filter(Boolean).join(' - ');
+    }
+
+    function actualizarSelectorFiltroServicios(listaBase) {
+        const sel = document.getElementById('selectFiltroServicioSalida');
+        if (!sel) return;
+        const valorPrevio = sel.value || 'TODOS';
+        const serviciosSet = new Set();
+
+        (listaBase || []).forEach(item => {
+            const nomServ = obtenerNombreServicioSalida(item);
+            if (nomServ && nomServ !== 'SIN DIRECCIÓN DE SALIDA') {
+                serviciosSet.add(nomServ);
+            }
+        });
+
+        const arrServicios = Array.from(serviciosSet).sort();
+        sel.innerHTML = '<option value="TODOS">VER TODOS LOS SERVICIOS / DIRECCIONES DE SALIDA</option>' +
+            arrServicios.map(s => `<option value="${s.replace(/"/g, '&quot;')}">🚩 ${s}</option>`).join('');
+
+        if (arrServicios.includes(valorPrevio)) {
+            sel.value = valorPrevio;
+        } else {
+            sel.value = 'TODOS';
+        }
+    }
+
+    const _limpiarBuscadorOrig = limpiarBuscadorHistorial;
+    limpiarBuscadorHistorial = function() {
+        const selServ = document.getElementById('selectFiltroServicioSalida');
+        if (selServ) selServ.value = 'TODOS';
+        _limpiarBuscadorOrig();
+    };
+
     const _aplicarInterfazOrig2 = aplicarInterfazPorUsuario;
     aplicarInterfazPorUsuario = function() {
         inyectarControlesNuevosEnDOM();
+        inyectarEstilosYControlesServicioHistorial();
         _aplicarInterfazOrig2();
         aplicarBloqueoEdicionHorasExcedentes();
         actualizarEtiquetaGpsInicioPlanilla();
@@ -6310,6 +6570,8 @@
     obtenerHistorialFiltradoActual = function() {
         const inpBuscar = document.getElementById('inputBuscarHistorial');
         const terminoBusqueda = inpBuscar ? inpBuscar.value.trim().toUpperCase() : '';
+        const selServicio = document.getElementById('selectFiltroServicioSalida');
+        const filtroServicio = selServicio ? selServicio.value : 'TODOS';
 
         let historialTotal = [];
         try {
@@ -6333,17 +6595,25 @@
             historialVisible = historialTotal.filter(item => item.creadoPor === usuarioActivo.username);
         }
 
+        actualizarSelectorFiltroServicios(historialVisible);
+
+        if (filtroServicio && filtroServicio !== 'TODOS') {
+            historialVisible = historialVisible.filter(item => obtenerNombreServicioSalida(item) === filtroServicio);
+        }
+
         if (terminoBusqueda !== '') {
             historialVisible = historialVisible.filter(item => {
                 const textoCompletoHoja = [
                     item.numHoja, item.fecha, item.creadoPor, item.cliente,
+                    obtenerNombreServicioSalida(item),
+                    item.dirSalida, item.locSalida, item.dirLlegada, item.locLlegada,
+                    item.dirSalida2, item.locSalida2, item.dirLlegada2, item.locLlegada2,
                     item.nombreJjee, item.cuitJjee,
                     item.nombreAux, item.cunAux,
                     item.nombreAux2, item.cunAux2,
                     item.numMovil, item.patenteMovil, item.remito, item.modulo,
                     item.chofer1, item.contenedor1, item.chasis1, item.semi1,
                     item.chofer2, item.contenedor2, item.chasis2, item.semi2,
-                    item.dirSalida, item.locSalida, item.dirLlegada, item.locLlegada,
                     item.observaciones, item.firmaApellidoNombre, item.firmaDni
                 ].map(v => String(v || '').toUpperCase()).join(' | ');
                 return textoCompletoHoja.includes(terminoBusqueda);
@@ -6352,55 +6622,122 @@
         return historialVisible;
     };
 
-    // Mostrar Coordenadas GPS Inicio/Fin, Auxiliar 2 y Botón directo al PDF en Google Drive
-    const _mostrarHistorialBase = mostrarHistorial;
+    // Renderizado amigable del Historial (Tarjetas separadas en Celular y Tabla estructurada en PC)
     mostrarHistorial = function() {
-        _mostrarHistorialBase();
+        inyectarEstilosYControlesServicioHistorial();
         const tbody = document.getElementById('tablaHistorial');
+        const btnHistorial = document.getElementById('btnAbrirHistorial');
         if (!tbody) return;
+
+        let historialTotal = [];
+        try {
+            historialTotal = JSON.parse(leerStorageSeguro('hojasDeRutaLince', '[]')) || [];
+            if (!Array.isArray(historialTotal)) historialTotal = [];
+        } catch (e) { historialTotal = []; }
+
+        const esAdmin = esRolAdmin();
+        const veTodas = esRolAdminOColaborador();
         const historialVisible = obtenerHistorialFiltradoActual();
-        const filas = tbody.querySelectorAll('tr');
-        historialVisible.forEach((item, idx) => {
-            const fila = filas[idx];
-            if (!fila || !fila.cells || fila.cells.length < 7) return;
 
-            const celdaFecha = fila.cells[1];
-            if (celdaFecha && !celdaFecha.querySelector('.links-gps-historial')) {
-                const divGps = document.createElement('div');
-                divGps.className = 'links-gps-historial';
-                divGps.style.marginTop = '5px';
-                const linkIni = formatearLinkMaps(item.gpsInicio);
-                const linkFin = formatearLinkMaps(item.gpsFin);
-                const coordIni = formatearTextoCoordenada(item.gpsInicio);
-                const coordFin = formatearTextoCoordenada(item.gpsFin);
-                const cantFotos = item.cantidadFotosAdjuntas || (Array.isArray(item.fotosComprobantes) ? item.fotosComprobantes.length : 0);
-                divGps.innerHTML = `
-                    ${linkIni ? `<div style="margin-top:3px;"><a href="${linkIni}" target="_blank" style="font-size:10px; font-weight:bold; color:#15803d; text-decoration:underline;">📍 INICIO: ${coordIni}</a></div>` : ''}
-                    ${linkFin ? `<div style="margin-top:3px;"><a href="${linkFin}" target="_blank" style="font-size:10px; font-weight:bold; color:#1d4ed8; text-decoration:underline;">🏁 FIN: ${coordFin}</a></div>` : ''}
-                    ${cantFotos > 0 ? `<div style="margin-top:3px; font-size:10px; font-weight:bold; color:#0369a1;">📷 ${cantFotos} foto(s) en PDF</div>` : ''}
-                `;
-                celdaFecha.appendChild(divGps);
+        if (btnHistorial) {
+            if (veTodas) {
+                btnHistorial.innerText = `📂 VER HISTORIAL COMPLETO (${historialTotal.length})`;
+            } else if (usuarioActivo) {
+                const misHojas = historialTotal.filter(item => item.creadoPor === usuarioActivo.username);
+                btnHistorial.innerText = `📂 MIS HOJAS DE RUTA (${misHojas.length})`;
             }
+        }
 
-            const celdaCustodios = fila.cells[4];
-            if (celdaCustodios && (item.nombreAux2 || item.cunAux2) && !celdaCustodios.innerHTML.includes('AUX 2:')) {
-                const divAux2 = document.createElement('div');
-                divAux2.innerHTML = `<b>AUX 2:</b> ${item.nombreAux2 || '-'} (${item.cunAux2 || '-'})`;
-                celdaCustodios.insertBefore(divAux2, celdaCustodios.lastElementChild);
-            }
+        if (historialVisible.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 18px; font-weight: bold;">NO SE ENCONTRARON HOJAS DE RUTA CON ESE CRITERIO DE BÚSQUEDA</td></tr>';
+            return;
+        }
 
-            const celdaAcciones = fila.cells[6];
-            if (celdaAcciones && item.urlPdfDrive && !celdaAcciones.querySelector('.btn-abrir-drive-directo')) {
-                const contAcc = celdaAcciones.querySelector('.contenedor-acciones') || celdaAcciones;
-                const linkDrive = document.createElement('a');
-                linkDrive.href = item.urlPdfDrive;
-                linkDrive.target = '_blank';
-                linkDrive.className = 'btn-accion-chico btn-cargar btn-abrir-drive-directo';
-                linkDrive.style.cssText = 'text-decoration:none; display:inline-block; text-align:center; background:linear-gradient(180deg, #0284c7 0%, #0369a1 100%);';
-                linkDrive.innerText = '☁️ VER DRIVE';
-                contAcc.insertBefore(linkDrive, contAcc.firstChild);
-            }
-        });
+        const colaIds = obtenerColaOffline().map(x => String(x.datosHoja && x.datosHoja.id));
+
+        tbody.innerHTML = historialVisible.map(item => {
+            const estaPendiente = colaIds.includes(String(item.id)) || item.subidoADrive === false;
+            const badgeDrive = estaPendiente
+                ? `<span class="tag-estado-drive tag-drive-pendiente">⏳ PENDIENTE SEÑAL</span>`
+                : `<span class="tag-estado-drive tag-drive-ok">☁️ EN DRIVE</span>`;
+
+            const servicioSalida = obtenerNombreServicioSalida(item);
+            const destinoLlegada = obtenerDestinoLlegada(item);
+            const linkIni = formatearLinkMaps(item.gpsInicio);
+            const linkFin = formatearLinkMaps(item.gpsFin);
+            const horaIni = (item.gpsInicio && item.gpsInicio.hora) ? item.gpsInicio.hora : '';
+            const horaFin = (item.gpsFin && item.gpsFin.hora) ? item.gpsFin.hora : '';
+            const cantFotos = item.cantidadFotosAdjuntas || (Array.isArray(item.fotosComprobantes) ? item.fotosComprobantes.length : 0);
+
+            return `
+            <tr class="fila-hoja-historial">
+                <!-- 1. N° DE HOJA Y ESTADO -->
+                <td class="celda-cabecera-tarjeta" style="text-align:center; font-weight:bold;">
+                    <div class="num-hoja-movil" style="font-size: 13.5px; color: #143627;">📄 N° ${item.numHoja || '-'}</div>
+                    <div>${badgeDrive}</div>
+                </td>
+
+                <!-- 2. FECHA, HORA Y BOTONES COMPACTOS DE MAPA GPS -->
+                <td style="text-align:center;">
+                    <span class="etiqueta-movil-hist">📅 FECHA DEL SERVICIO Y UBICACIÓN GPS:</span>
+                    <div style="font-weight:bold; font-size:12.5px; color:#0f172a;">📅 ${item.fecha || '-'}</div>
+                    ${item.fechaHoraCargaReal ? `<div style="font-size:10px; color:#475569; margin-top:2px;">🕒 Carga: ${item.fechaHoraCargaReal}</div>` : ''}
+                    <div class="contenedor-chips-gps-movil">
+                        ${linkIni ? `<a href="${linkIni}" target="_blank" class="chip-gps-compacto chip-gps-ini" title="Coordenadas Inicio: ${formatearTextoCoordenada(item.gpsInicio)}">📍 MAPA INICIO ${horaIni ? '(' + horaIni + ')' : ''}</a>` : ''}
+                        ${linkFin ? `<a href="${linkFin}" target="_blank" class="chip-gps-compacto chip-gps-fin" title="Coordenadas Fin: ${formatearTextoCoordenada(item.gpsFin)}">🏁 MAPA FIN ${horaFin ? '(' + horaFin + ')' : ''}</a>` : ''}
+                    </div>
+                    ${cantFotos > 0 ? `<div style="margin-top:4px; font-size:10px; font-weight:bold; color:#0369a1;">📷 ${cantFotos} foto(s) en PDF</div>` : ''}
+                </td>
+
+                <!-- 3. USUARIO CREADOR -->
+                <td style="text-align:center; font-weight:bold; color:#1e3a8a;">
+                    <span class="etiqueta-movil-hist">👤 USUARIO QUE CARGÓ LA HOJA:</span>
+                    <span style="background:#e0e7ff; color:#1e3a8a; padding:4px 8px; border-radius:4px; font-size:11.5px; display:inline-block;">👤 ${item.creadoPor || 'ADMIN'}</span>
+                </td>
+
+                <!-- 4. CLIENTE + NOMBRE DEL SERVICIO (DIRECCIÓN DE SALIDA) ABAJO -->
+                <td style="text-align:center;">
+                    <span class="etiqueta-movil-hist">🏢 CLIENTE Y NOMBRE DEL SERVICIO (DIRECCIÓN DE SALIDA):</span>
+                    <div style="font-weight:bold; font-size:13px; color:#143627; text-align:left;">🏢 ${item.cliente || 'EDESUR S.A'}</div>
+                    <div class="caja-servicio-salida">
+                        <span class="titulo-serv">🚩 SERVICIO / DIRECCIÓN DE SALIDA:</span>
+                        <span class="valor-serv">${servicioSalida}</span>
+                        ${destinoLlegada ? `<div class="caja-servicio-llegada">➡️ LLEGADA: ${destinoLlegada}</div>` : ''}
+                    </div>
+                </td>
+
+                <!-- 5. DETALLE PROLIJO DE CUSTODIOS (JJEE / AUX 1 / AUX 2) Y MÓVIL -->
+                <td>
+                    <span class="etiqueta-movil-hist">🛡️ PERSONAL DE CUSTODIA Y MÓVIL:</span>
+                    <div class="bloque-custodio-item"><b>👮 JJEE:</b> ${item.nombreJjee || '-'} <span style="color:#475569;">(${item.cuitJjee || '-'})</span></div>
+                    ${(item.nombreAux || item.cunAux) ? `<div class="bloque-custodio-item"><b>🛡️ AUX 1:</b> ${item.nombreAux || '-'} <span style="color:#475569;">(${item.cunAux || '-'})</span></div>` : ''}
+                    ${(item.nombreAux2 || item.cunAux2) ? `<div class="bloque-custodio-item"><b>🛡️ AUX 2:</b> ${item.nombreAux2 || '-'} <span style="color:#475569;">(${item.cunAux2 || '-'})</span></div>` : ''}
+                    <div class="bloque-custodio-item" style="margin-bottom:0; background:#f1f5f9;">
+                        <b>🚓 MÓVIL:</b> ${item.numMovil || '-'} ${item.patenteMovil ? ' | <b>PAT:</b> ' + item.patenteMovil : ''}
+                        ${(item.horaCitacion || item.horaFinalizacion) ? `<div style="font-size:10.5px; color:#1e3a8a; margin-top:2px;">🕒 Horario: ${item.horaCitacion || '--:--'} a ${item.horaFinalizacion || '--:--'}</div>` : ''}
+                    </div>
+                </td>
+
+                <!-- 6. HORAS EXCEDENTES Y KILÓMETROS -->
+                <td style="text-align:center; font-weight:bold;">
+                    <span class="etiqueta-movil-hist">⏱️ HORAS COMPUTADAS / EXCEDENTES:</span>
+                    <div class="badge-horas-hist">⏱️ ${item.jjeeHorasExc || '00:00 HS'}</div>
+                    ${item.kilometros ? `<div style="font-size:11px; color:#334155; margin-top:4px;">🛣️ ${item.kilometros} KM</div>` : ''}
+                </td>
+
+                <!-- 7. BOTONES DE ACCIÓN (EN GRILLA 2x2 EN CELULAR) -->
+                <td style="text-align:center;">
+                    <span class="etiqueta-movil-hist">⚙️ ACCIONES DE ESTA HOJA DE RUTA:</span>
+                    <div class="grilla-acciones-hist">
+                        ${item.urlPdfDrive ? `<a href="${item.urlPdfDrive}" target="_blank" class="btn-accion-chico btn-cargar btn-abrir-drive-directo" style="background:linear-gradient(180deg, #0284c7 0%, #0369a1 100%);">☁️ VER DRIVE</a>` : ''}
+                        ${veTodas ? `<button type="button" class="btn-accion-chico btn-cargar" onclick="cargarHojaGuardada(${item.id})">VER EN PLANILLA</button>` : ''}
+                        <button type="button" class="btn-accion-chico btn-descargar-item" onclick="descargarHojaDesdeHistorial(${item.id})">📄 PDF</button>
+                        ${esAdmin ? `<button type="button" class="btn-accion-chico btn-eliminar" onclick="eliminarHojaGuardada(${item.id})">🗑️ BORRAR</button>` : ''}
+                    </div>
+                </td>
+            </tr>
+            `;
+        }).join('');
     };
 
     obtenerDatosConsolidadosControl = function() {
